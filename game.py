@@ -1,60 +1,64 @@
-import pygame
+import pygame as pg
 import sys
 from pygame.locals import *
+from pygame.sprite import Sprite
 
-pygame.init()
-vec = pygame.math.Vector2  # 2 dimensional
+from settings import Settings
+from player import Player
 
+#START
+# Use later
+vec = pg.math.Vector2  # 2 dimensional
+
+# Moved to settings
 HEIGHT = 450
 WIDTH = 400
 ACC = 0.5
 FRIC = -0.12
 FPS = 60
+#END
 
-FramePerSec = pygame.time.Clock()
-display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("GAME")
-
-
-class Player(pygame.sprite.Sprite):
+class Platform(Sprite):
+    #Make into a module later
     def __init__(self):
         super().__init__()
-        # create surface object
-        self.surf = pygame.Surface((30, 30))
-        # give surface a color
-        self.surf.fill((128, 255, 40))
-        # create rect object
-        # center defines starting object when drawn
-        # top left corner is origin point with (0,0)
-        self.rect = self.surf.get_rect(center=(10, 420))
-
-
-class platform(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.surf = pygame.Surface((WIDTH, 20))
+        self.surf = pg.Surface((WIDTH, 20))
         self.surf.fill((255, 0, 0))
         self.rect = self.surf.get_rect(center=(WIDTH/2, HEIGHT - 10))
 
 
-PT1 = platform()
-P1 = Player()
+class Game:
+    def __init__(self):
+        pg.init()
+        self.settings = Settings()
+        self.clock = pg.time.Clock()
+        self.screen = pg.display.set_mode(
+            (self.settings.screen_width, self.settings.screen_height), 0, 32)
+        pg.display.set_caption("Pygame Platform")
+        self.player = Player(game=self)
+        self.platform = Platform()
+
+        self.sprites = pg.sprite.Group()
+        self.sprites.add(self.player)
+        self.sprites.add(self.platform)
 
 
-all_sprites = pygame.sprite.Group()
-all_sprites.add(PT1)
-all_sprites.add(P1)
+    def play(self):
+        while True:
+            for event in pg.event.get():
+                if event.type == QUIT:
+                    pg.quit()
+                    sys.exit()
 
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
+            self.screen.fill((0, 0, 0))
 
-    display_surface.fill((0, 0, 0))
+            for entity in self.sprites:
+                self.screen.blit(entity.surf, entity.rect)
 
-    for entity in all_sprites:
-        display_surface.blit(entity.surf, entity.rect)
+                pg.display.update()
+                self.clock.tick(self.settings.fps)
 
-        pygame.display.update()
-        FramePerSec.tick(FPS)
+if __name__ == "__main__":
+    '''Call py game.py to initiate and run the game'''
+    level = Game()
+    level.play()
