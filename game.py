@@ -10,23 +10,6 @@ from player import Player
 # Use later
 vec = pg.math.Vector2  # 2 dimensional
 
-# Moved to settings
-HEIGHT = 450
-WIDTH = 400
-ACC = 0.5
-FRIC = -0.12
-FPS = 60
-#END
-
-class Platform(Sprite):
-    #Make into a module later
-    def __init__(self):
-        super().__init__()
-        self.surf = pg.Surface((WIDTH, 20))
-        self.surf.fill((255, 0, 0))
-        self.rect = self.surf.get_rect(center=(WIDTH/2, HEIGHT - 10))
-
-
 class Game:
     def __init__(self):
         pg.init()
@@ -35,28 +18,71 @@ class Game:
         self.screen = pg.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height), 0, 32)
         pg.display.set_caption("Pygame Platform")
-        self.player = Player(game=self)
-        self.platform = Platform()
+        #Create first player
+        #initial height is set to be (screen_height - 19) to avoid upward movement at the start of the game
+        self.player = Player(self.screen, 0, self.settings.screen_height - 19, 1, self.settings)
 
         self.sprites = pg.sprite.Group()
         self.sprites.add(self.player)
-        self.sprites.add(self.platform)
 
 
     def play(self):
+    
+        #movement bool
+        moving_left = False
+        moving_right = False
+        
         while True:
+            if self.player.alive:
+                #update jump action, action(2) for jump
+                if self.player.in_air:
+                    self.player.update_action(2)
+                #update player's action
+                elif moving_left or moving_right:
+                    #if moving, using action 1 for run
+                    self.player.update_action(1)
+                else:
+                    #if not, using action 0 for idle
+                    self.player.update_action(0)
+            
             for event in pg.event.get():
+                #quit condition
                 if event.type == QUIT:
                     pg.quit()
                     sys.exit()
-
-            self.screen.fill((0, 0, 0))
+                    
+                #keyborad button press
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_a:
+                        moving_left = True
+                    if event.key == pg.K_d:
+                        moving_right = True
+                    if event.key == pg.K_SPACE and self.player.alive:
+                        self.player.jump = True
+                        
+                #keyborad button release
+                if event.type == pg.KEYUP:
+                    if event.key == pg.K_a:
+                        moving_left = False
+                    if event.key == pg.K_d:
+                        moving_right = False
+                        
+            self.settings.move_left = moving_left
+            self.settings.move_right = moving_right
+            
 
             for entity in self.sprites:
-                self.screen.blit(entity.surf, entity.rect)
+                #draw bg color before each loop
+                entity.draw_BG()
+                #player animation
+                entity.update_animation()
+                #draw players
+                entity.draw()
+                #move player
+                entity.move()
 
-                pg.display.update()
-                self.clock.tick(self.settings.fps)
+            pg.display.update()
+            self.clock.tick(self.settings.fps)
 
 if __name__ == "__main__":
     '''Call py game.py to initiate and run the game'''
