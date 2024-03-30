@@ -1,7 +1,7 @@
 import pygame as pg
 import sys
 from pygame.locals import *
-from pygame.sprite import Sprite
+from pygame.sprite import Sprite, Group
 
 from settings import Settings
 from player import Player
@@ -22,66 +22,76 @@ class Game:
         pg.display.set_caption("Pygame Platform")
         # Create first player
         # initial height is set to be (screen_height - 19) to avoid upward movement at the start of the game
+
+        # TODO - Should have game as input instead of screen, so that player movement doesn't have to taken from settings py
         self.player = Player(
             self.screen, 0, self.settings.screen_height - 19, 1, self.settings
         )
 
-        self.sprites = pg.sprite.Group()
+        # TODO - Simplfy players no need for groups. There are only map, monster and player
+        self.sprites = Group()
         self.sprites.add(self.player)
+
+        # Player Movement Bools
+        self.moving_left = False
+        self.moving_right = False
+
+    
+    def check_events(self):
+        for event in pg.event.get():
+            #Quit Condition
+            if event.type == QUIT:
+                pg.quit()
+                sys.exit()
+            #Keydown Press
+            if event.type == KEYDOWN:
+                key = event.key
+                if key == K_d or key == K_RIGHT:
+                    self.moving_right = True
+                if key == K_a or key == K_LEFT:
+                    self.moving_left = True
+                if key == K_SPACE and self.player.alive:
+                    self.player.jump = True
+            #Keyup Press
+            if event.type == KEYUP:
+                key = event.key
+                if key == K_d or key == K_RIGHT:
+                    self.moving_right = False
+                if key == K_a or key == K_LEFT:
+                    self.moving_left = False
+
+        self.settings.move_left = self.moving_left
+        self.settings.move_right = self.moving_right
 
     def play(self):
 
-        # movement bool
-        moving_left = False
-        moving_right = False
-
         while True:
+            # TODO - Lets change how event handling is placed (separate method)
+            # As well as how the user animation is made and how entities are updated
+            # The current code assumes that all classes will follow the same methods.
+            # But monster might be different
+            
+            # Check pygame events (movement)
+            self.check_events()
+            # END of TODO
+
+            # TODO - Implement wihtin player update()
             if self.player.alive:
                 # update jump action, action(2) for jump
                 if self.player.in_air:
                     self.player.update_action(2)
                 # update player's action
-                elif moving_left or moving_right:
+                elif self.moving_left or self.moving_right:
                     # if moving, using action 1 for run
                     self.player.update_action(1)
                 else:
                     # if not, using action 0 for idle
                     self.player.update_action(0)
-
-            for event in pg.event.get():
-                # quit condition
-                if event.type == QUIT:
-                    pg.quit()
-                    sys.exit()
-
-                # keyborad button press
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_a:
-                        moving_left = True
-                    if event.key == pg.K_LEFT:
-                        moving_left = True
-                    if event.key == pg.K_d:
-                        moving_right = True
-                    if event.key == pg.K_RIGHT:
-                        moving_right = True
-                    if event.key == pg.K_SPACE and self.player.alive:
-                        self.player.jump = True
-
-                # keyborad button release
-                # LEFT/RIGHT are arrow keys, we can account for both types
-                if event.type == pg.KEYUP:
-                    if event.key == pg.K_a:
-                        moving_left = False
-                    if event.key == pg.K_LEFT:
-                        moving_left = False
-                    if event.key == pg.K_d:
-                        moving_right = False
-                    if event.key == pg.K_RIGHT:
-                        moving_right = False
-
-            self.settings.move_left = moving_left
-            self.settings.move_right = moving_right
-
+            # END of TODO
+                    
+            # TODO - Remove to handle drawing the updaing in the same line (inside class)
+                # self.player.update()
+                    
             for entity in self.sprites:
                 # draw bg color before each loop
                 entity.draw_BG()
@@ -91,6 +101,7 @@ class Game:
                 entity.draw()
                 # move player
                 entity.move()
+            # END of TODO
 
             pg.display.update()
             self.clock.tick(self.settings.fps)
