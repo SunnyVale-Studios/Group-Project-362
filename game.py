@@ -1,7 +1,6 @@
 import pygame as pg
 import sys
 from pygame.locals import *
-from pygame.sprite import Sprite, Group
 
 from settings import Settings
 from player import Player
@@ -23,14 +22,15 @@ class Game:
         # Create first player
         # initial height is set to be (screen_height - 19) to avoid upward movement at the start of the game
 
-        # TODO - Should have game as input instead of screen, so that player movement doesn't have to taken from settings py
-        self.player = Player(
-            self.screen, 0, self.settings.screen_height - 19, 1, self.settings
-        )
+        # Pass the game instance to the Player class
+        self.player = Player(self, 0, self.settings.screen_height - 19, 1)
 
-        # TODO - Simplfy players no need for groups. There are only map, monster and player
-        self.sprites = Group()
-        self.sprites.add(self.player)
+        # Use a dictionary to store different types of sprites
+        self.entities = {
+            'player': self.player,
+            # 'monster': self.monster,
+            # 'map': self.map,
+        }
 
         # Player Movement Bools
         self.moving_left = False
@@ -64,47 +64,44 @@ class Game:
         self.settings.move_right = self.moving_right
 
     def play(self):
-
         while True:
-            # TODO - Lets change how event handling is placed (separate method)
-            # As well as how the user animation is made and how entities are updated
-            # The current code assumes that all classes will follow the same methods.
-            # But monster might be different
+            self.events_checker()
+            self.update_entities()
+            self.draw_entities()
             
-            # Check pygame events (movement)
-            self.check_events()
-            # END of TODO
-
-            # TODO - Implement wihtin player update()
-            if self.player.alive:
-                # update jump action, action(2) for jump
-                if self.player.in_air:
-                    self.player.update_action(2)
-                # update player's action
-                elif self.moving_left or self.moving_right:
-                    # if moving, using action 1 for run
-                    self.player.update_action(1)
-                else:
-                    # if not, using action 0 for idle
-                    self.player.update_action(0)
-            # END of TODO
-                    
-            # TODO - Remove to handle drawing the updaing in the same line (inside class)
-                # self.player.update()
-                    
-            for entity in self.sprites:
-                # draw bg color before each loop
-                entity.draw_BG()
-                # player animation
-                entity.update_animation()
-                # draw players
-                entity.draw()
-                # move player
-                entity.move()
-            # END of TODO
-
             pg.display.update()
             self.clock.tick(self.settings.fps)
+
+    def events_checker(self):
+        # Check events
+        self.check_events()
+
+    def update_entities(self):
+        #when player is alive
+        if self.player.alive:
+            # Update the animation
+            self.player.update_animation()
+            # update jump action for jump
+            if self.player.in_air:
+                self.player.update_action('jump')
+            # update player's action
+            elif self.moving_left or self.moving_right:
+                # if moving, update action for run
+                self.player.update_action('run')
+            else:
+                # if not, update action for idle
+                self.player.update_action('idle')
+
+            # Update all entities
+            for entity in self.entities.values():
+                entity.move()
+
+    def draw_entities(self):
+        for entity in self.entities.values():
+            # draw bg color before each loop
+            entity.draw_BG()
+            # draw players
+            entity.draw()
 
 
 if __name__ == "__main__":

@@ -1,12 +1,13 @@
 import pygame as pg
 import os
 from pygame.sprite import Sprite
+from timer import Timer
 
 class Player(Sprite):
-    def __init__(self, screen, x, y ,scale, settings):
+    def __init__(self, game, x, y ,scale):
         super().__init__()
-        self.screen = screen
-        self.settings = settings
+        self.screen = game.screen
+        self.settings = game.settings
         #Set player status, use later
         self.alive = True
         self.velocity = pg.Vector2(0,0)
@@ -16,39 +17,37 @@ class Player(Sprite):
         self.in_air = True
         #vertical velocity
         self.vel_y = 0
-        #Animation list
-        self.animation_list = []
-        self.frame_index = 0
-        #Action type (0 for idle, 1 for run)
-        self.action = 0
-        self.update_time = pg.time.get_ticks()
         
-        #Define base path for player imgs
-        Base_Player_Path = 'assets/Adventurer/Indvidual Sprites/'
-        
-        #load all images for the player
-        animation_types = ['idle', 'run', 'jump']
-        for animation in animation_types:
-            #reset temp list of images
-            temp_list = []
-            #count number of files in the folder
-            num_of_frames = len(os.listdir(Base_Player_Path + f'{animation}'))
-            #idle animation
-            for i in range(num_of_frames): 
-                #load player img
-                self.img = pg.image.load(Base_Player_Path + f'{animation}/adventurer-{animation}-0{i}-1.3.png')
-                #scale player img if needed
-                self.img = pg.transform.scale(self.img, (int(self.img.get_width() * scale), int(self.img.get_height() * scale)))
-                temp_list.append(self.img)
-            self.animation_list.append(temp_list)
-        
-        self.image = self.animation_list[self.action][self.frame_index]
-        #Set player location
-        self.rect = self.image.get_rect()
+        # Animation list
+        self.animations = {
+            'idle': Timer(self.load_images('idle', scale), 'idle'),
+            'run': Timer(self.load_images('run', scale), 'run'),
+            'jump': Timer(self.load_images('jump', scale), 'jump'),
+        }
+        self.current_animation = self.animations['idle']
+        # Set player location
+        self.rect = self.current_animation.image().get_rect()
         self.rect.center = (x, y)
-        
-        #Set player direction
+        # Set player direction
         self.direction = 1
+    
+    def load_images(self, animation_name, scale):
+        # Define base path for player imgs
+        Base_Player_Path = 'assets/Adventurer/Indvidual Sprites/'
+        # Load all images for the player
+        temp_list = []
+        # Count number of files in the folder
+        num_of_frames = len(os.listdir(Base_Player_Path + f'{animation_name}'))
+        for i in range(num_of_frames): 
+            # Load player img
+            img = pg.image.load(Base_Player_Path + f'{animation_name}/adventurer-{animation_name}-0{i}-1.3.png')
+            # Scale player img if needed
+            img = pg.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+            temp_list.append(img)
+        return temp_list
+    
+    def update_animation(self):
+        self.current_animation.next_frame()
     
     #Set player's movement
     def move(self):
@@ -90,36 +89,21 @@ class Player(Sprite):
             self.rect.right = self.settings.screen_width
         else:
             self.rect.x += self.velocity.x
-    
-    #Set player animation
-    def update_animation(self):
-        self.ANIMATION_COOLDOWN = 100
-        #update img depend on current frame
-        self.image = self.animation_list[self.action][self.frame_index]
-        #check if there is enough time has passed since last update
-        if pg.time.get_ticks() - self.update_time > self.ANIMATION_COOLDOWN:
-            self.update_time = pg.time.get_ticks()
-            self.frame_index += 1
-        #reset index if run out of list
-        if self.frame_index >= len(self.animation_list[self.action]):
-            self.frame_index = 0
         
     
     def update_action(self, new_action):
-        #check if the new action is different from the previous one
-        if new_action != self.action:
-            self.action = new_action
-            #update animation setting
-            self.frame_index = 0
-            self.update_time = pg.time.get_ticks()
+    # check if the new action is different from the previous one
+        if new_action != self.current_animation.action:
+            self.current_animation = self.animations[new_action]
+            self.current_animation.reset()
     
-    #draw players on the screen
+    # draw players on the screen
     def draw(self):
         # Flip the image if moving to the left
         if self.direction == -1:
-            self.screen.blit(pg.transform.flip(self.image, True, False), self.rect)
+            self.screen.blit(pg.transform.flip(self.current_animation.image(), True, False), self.rect)
         else:
-            self.screen.blit(self.image, self.rect)
+            self.screen.blit(self.current_animation.image(), self.rect)
         
     def draw_BG(self):
         self.screen.fill((25, 25, 25))

@@ -2,8 +2,9 @@ import pygame as pg
 
 class Timer:
     """ Module will update the image of the object (ie. player, monster animations) """
-    def __init__(self, image_list, start_index=0, delay=100, is_loop=True):
+    def __init__(self, image_list, action, start_index=0, delay=100, is_loop=True):
         self.image_list = image_list
+        self.action = action
         self.delay = delay
         self.is_loop = is_loop
         self.last_time_switched = pg.time.get_ticks()
@@ -12,7 +13,8 @@ class Timer:
         self.index = start_index if start_index < len(image_list) - 1 else 0
 
     def next_frame(self):
-        if self.is_expired: return
+        if self.is_expired():
+            return
         now = pg.time.get_ticks()
         if now - self.last_time_switched >= self.delay:
             self.index += 1
