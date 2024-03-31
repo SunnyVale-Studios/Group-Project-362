@@ -1,7 +1,6 @@
 import pygame as pg
 import sys
 from pygame.locals import *
-from pygame.sprite import Sprite
 
 from settings import Settings
 from player import Player
@@ -22,78 +21,87 @@ class Game:
         pg.display.set_caption("Pygame Platform")
         # Create first player
         # initial height is set to be (screen_height - 19) to avoid upward movement at the start of the game
-        self.player = Player(
-            self.screen, 0, self.settings.screen_height - 19, 1, self.settings
-        )
 
-        self.sprites = pg.sprite.Group()
-        self.sprites.add(self.player)
+        # Pass the game instance to the Player class
+        self.player = Player(self, 0, self.settings.screen_height - 19, 1)
+
+        # Use a dictionary to store different types of sprites
+        self.entities = {
+            'player': self.player,
+            # 'monster': self.monster,
+            # 'map': self.map,
+        }
+
+        # Player Movement Bools
+        self.moving_left = False
+        self.moving_right = False
+
+    
+    def check_events(self):
+        for event in pg.event.get():
+            #Quit Condition
+            if event.type == QUIT:
+                pg.quit()
+                sys.exit()
+            #Keydown Press
+            if event.type == KEYDOWN:
+                key = event.key
+                if key == K_d or key == K_RIGHT:
+                    self.moving_right = True
+                if key == K_a or key == K_LEFT:
+                    self.moving_left = True
+                if key == K_SPACE and self.player.alive:
+                    self.player.jump = True
+            #Keyup Press
+            if event.type == KEYUP:
+                key = event.key
+                if key == K_d or key == K_RIGHT:
+                    self.moving_right = False
+                if key == K_a or key == K_LEFT:
+                    self.moving_left = False
+
+        self.settings.move_left = self.moving_left
+        self.settings.move_right = self.moving_right
 
     def play(self):
-
-        # movement bool
-        moving_left = False
-        moving_right = False
-
         while True:
-            if self.player.alive:
-                # update jump action, action(2) for jump
-                if self.player.in_air:
-                    self.player.update_action(2)
-                # update player's action
-                elif moving_left or moving_right:
-                    # if moving, using action 1 for run
-                    self.player.update_action(1)
-                else:
-                    # if not, using action 0 for idle
-                    self.player.update_action(0)
-
-            for event in pg.event.get():
-                # quit condition
-                if event.type == QUIT:
-                    pg.quit()
-                    sys.exit()
-
-                # keyborad button press
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_a:
-                        moving_left = True
-                    if event.key == pg.K_LEFT:
-                        moving_left = True
-                    if event.key == pg.K_d:
-                        moving_right = True
-                    if event.key == pg.K_RIGHT:
-                        moving_right = True
-                    if event.key == pg.K_SPACE and self.player.alive:
-                        self.player.jump = True
-
-                # keyborad button release
-                # LEFT/RIGHT are arrow keys, we can account for both types
-                if event.type == pg.KEYUP:
-                    if event.key == pg.K_a:
-                        moving_left = False
-                    if event.key == pg.K_LEFT:
-                        moving_left = False
-                    if event.key == pg.K_d:
-                        moving_right = False
-                    if event.key == pg.K_RIGHT:
-                        moving_right = False
-
-            self.settings.move_left = moving_left
-            self.settings.move_right = moving_right
-
-            for entity in self.sprites:
-                # draw bg color before each loop
-                entity.draw_BG()
-                # player animation
-                entity.update_animation()
-                # draw players
-                entity.draw()
-                # move player
-                entity.move()
-
+            self.events_checker()
+            self.update_entities()
+            self.draw_entities()
+            
             pg.display.update()
             self.clock.tick(self.settings.fps)
+
+    def events_checker(self):
+        # Check events
+        self.check_events()
+
+    def update_entities(self):
+        #when player is alive
+        if self.player.alive:
+            # Update the animation
+            self.player.update_animation()
+            # update jump action for jump
+            if self.player.in_air:
+                self.player.update_action('jump')
+            # update player's action
+            elif self.moving_left or self.moving_right:
+                # if moving, update action for run
+                self.player.update_action('run')
+            else:
+                # if not, update action for idle
+                self.player.update_action('idle')
+
+            # Update all entities
+            for entity in self.entities.values():
+                entity.move()
+
+    def draw_entities(self):
+        for entity in self.entities.values():
+            # draw bg color before each loop
+            entity.draw_BG()
+            # draw players
+            entity.draw()
 
 
 if __name__ == "__main__":
