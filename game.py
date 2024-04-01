@@ -55,7 +55,7 @@ class Game:
                     self.moving_right = True
                 if key == K_a or key == K_LEFT:
                     self.moving_left = True
-                if key == K_SPACE and self.player.alive:
+                if key == K_SPACE and self.player.alive and not self.player.in_air:
                     self.player.jump = True
             # Keyup Press
             if event.type == KEYUP:
