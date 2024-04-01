@@ -4,6 +4,7 @@ from pygame.locals import *
 
 from settings import Settings
 from player import Player
+from pytmx import load_pygame
 
 # START
 # Use later
@@ -18,7 +19,9 @@ class Game:
         self.screen = pg.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height), 0, 32
         )
-        pg.display.set_caption("Pygame Platform")
+        tmx_data = load_pygame("assets/Map/map_final.tmx")
+        pg.display.set_caption("The Forgotten Pages")
+
         # Create first player
         # initial height is set to be (screen_height - 19) to avoid upward movement at the start of the game
 
@@ -27,7 +30,7 @@ class Game:
 
         # Use a dictionary to store different types of sprites
         self.entities = {
-            'player': self.player,
+            "player": self.player,
             # 'monster': self.monster,
             # 'map': self.map,
         }
@@ -36,14 +39,13 @@ class Game:
         self.moving_left = False
         self.moving_right = False
 
-    
     def check_events(self):
         for event in pg.event.get():
-            #Quit Condition
+            # Quit Condition
             if event.type == QUIT:
                 pg.quit()
                 sys.exit()
-            #Keydown Press
+            # Keydown Press
             if event.type == KEYDOWN:
                 key = event.key
                 if key == K_d or key == K_RIGHT:
@@ -52,7 +54,7 @@ class Game:
                     self.moving_left = True
                 if key == K_SPACE and self.player.alive:
                     self.player.jump = True
-            #Keyup Press
+            # Keyup Press
             if event.type == KEYUP:
                 key = event.key
                 if key == K_d or key == K_RIGHT:
@@ -68,7 +70,7 @@ class Game:
             self.events_checker()
             self.update_entities()
             self.draw_entities()
-            
+
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
@@ -77,20 +79,20 @@ class Game:
         self.check_events()
 
     def update_entities(self):
-        #when player is alive
+        # when player is alive
         if self.player.alive:
             # Update the animation
             self.player.update_animation()
             # update jump action for jump
             if self.player.in_air:
-                self.player.update_action('jump')
+                self.player.update_action("jump")
             # update player's action
             elif self.moving_left or self.moving_right:
                 # if moving, update action for run
-                self.player.update_action('run')
+                self.player.update_action("run")
             else:
                 # if not, update action for idle
-                self.player.update_action('idle')
+                self.player.update_action("idle")
 
             # Update all entities
             for entity in self.entities.values():
