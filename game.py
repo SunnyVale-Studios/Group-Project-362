@@ -1,10 +1,12 @@
 import pygame as pg
 import sys
 from pygame.locals import *
-
-from settings import Settings
-from player import Player
 from pytmx import load_pygame
+
+from scripts.settings import Settings
+from scripts.player import Player
+
+# from scripts.Map import Map
 
 # START
 # Use later
@@ -19,13 +21,18 @@ class Game:
         self.screen = pg.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height), 0, 32
         )
-        tmx_data = load_pygame("assets/Map/map_final.tmx")
         pg.display.set_caption("The Forgotten Pages")
+
+        # load map
+        self.tmx_data = load_pygame("./assets/Map/map_final.tmx")
+        # world_offset will be used to move the camera
+        self.world_offset = [0, 0]
 
         # Create first player
         # initial height is set to be (screen_height - 19) to avoid upward movement at the start of the game
 
         # Pass the game instance to the Player class
+        # self.player = Player(self, 0, self.settings.screen_height - 19, 1)
         self.player = Player(self, 0, self.settings.screen_height - 19, 1)
 
         # Use a dictionary to store different types of sprites
@@ -67,7 +74,7 @@ class Game:
 
     def play(self):
         while True:
-            self.events_checker()
+            self.events_checker(),
             self.update_entities()
             self.draw_entities()
 
@@ -98,10 +105,21 @@ class Game:
             for entity in self.entities.values():
                 entity.move()
 
+    # display the map to the screen
+    def display_map(self, screen, tmx_data, world_offset):
+        for layer in tmx_data:
+            for tile in layer.tiles():
+                # scale the map, if you want to resize, change the tuple
+                img = pg.transform.scale(tile[2], (12, 12))
+                x_pixel = tile[0] * 12 + world_offset[0]
+                y_pixel = tile[1] * 12 + world_offset[1]
+                screen.blit(tile[2], (x_pixel, y_pixel))
+
     def draw_entities(self):
         for entity in self.entities.values():
             # draw bg color before each loop
             entity.draw_BG()
+            self.display_map(self.screen, self.tmx_data, self.world_offset)
             # draw players
             entity.draw()
 
