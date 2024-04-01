@@ -25,14 +25,14 @@ class Game:
 
         # load map
         self.tmx_data = load_pygame("./assets/Map/map_final.tmx")
-        # world_offset will be used to move the camera
-        self.world_offset = [0, 0]
+        self.world_offset = self.settings.world_offset
 
         # Create first player
         # initial height is set to be (screen_height - 19) to avoid upward movement at the start of the game
 
         # Pass the game instance to the Player class
-        self.player = Player(self, 0, self.settings.screen_height - 19, 1)
+        # self.player = Player(self, 0, self.settings.screen_height - 19, 1)
+        self.player = Player(self, 0, self.screen.get_size()[1] - 19, 1)
 
         # Use a dictionary to store different types of sprites
         self.entities = {
@@ -107,12 +107,12 @@ class Game:
     # display the map to the screen
     def display_map(self, screen, tmx_data, world_offset):
         for layer in tmx_data:
+            # x,y,surface
             for tile in layer.tiles():
-                # scale the map, if you want to resize, change the tuple
-                img = pg.transform.scale(tile[2], (12, 12))
-                x_pixel = tile[0] * 12 + world_offset[0]
-                y_pixel = tile[1] * 12 + world_offset[1]
-                screen.blit(tile[2], (x_pixel, y_pixel))
+                x_pixel = tile[0] * 16 + self.settings.world_offset[0]
+                y_pixel = tile[1] * 16 + self.settings.world_offset[1]
+                # draw surface onto the screen
+                self.screen.blit(tile[2], (x_pixel, y_pixel))
 
     def draw_entities(self):
         for entity in self.entities.values():

@@ -2,6 +2,7 @@ import pygame as pg
 import os
 from pygame.sprite import Sprite
 from scripts.timer import Timer
+from scripts.settings import Settings
 
 
 class Player(Sprite):
@@ -9,6 +10,7 @@ class Player(Sprite):
         super().__init__()
         self.screen = game.screen
         self.settings = game.settings
+        self.world_offset = self.settings.world_offset
         # Set player status, use later
         self.alive = True
         self.velocity = pg.Vector2(0, 0)
@@ -32,7 +34,7 @@ class Player(Sprite):
         # Set player direction
         self.direction = 1
 
-        self.bg = pg.transform.scale(
+        self.map_bg = pg.transform.scale(
             pg.image.load("./assets/Map/main_background.png").convert_alpha(),
             (self.settings.screen_width, self.settings.screen_height),
         )
@@ -98,13 +100,27 @@ class Player(Sprite):
                 if self.velocity.x > 0
                 else -self.settings.max_velocity
             )
+
         # Set movement boundary
         if self.rect.left + self.velocity.x < 0:
-            self.rect.left = 0
+            # -5 is the end of the left boundary
+            if self.world_offset[0] > -5:
+                self.world_offset[0] += 0
+            else:
+                # move camera left
+                self.rect.left = 0
+                self.world_offset[0] += 1
+
         elif self.rect.right + self.velocity.x > self.settings.screen_width:
-            self.rect.right = self.settings.screen_width
+            # -2520 is the end of the right boundary
+            if self.world_offset[0] < -2518:
+                self.world_offset[0] -= 0
+            else:
+                self.world_offset[0] -= 1
+                self.rect.right = self.settings.screen_width
         else:
             self.rect.x += self.velocity.x
+            # move camera right
 
     def update_action(self, new_action):
         # check if the new action is different from the previous one
@@ -124,8 +140,8 @@ class Player(Sprite):
             self.screen.blit(self.current_animation.image(), self.rect)
 
     def draw_BG(self):
-
-        self.screen.blit(self.bg, (0, 0))
+        # redraw backround to cover up previous animations
+        self.screen.blit(self.map_bg, (0, 0))
 
 
 if __name__ == "__main__":
