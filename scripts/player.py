@@ -116,11 +116,11 @@ class Player(Sprite):
             if self.world_offset[0] < -2518:
                 self.world_offset[0] -= 0
             else:
+                # move camera right
                 self.world_offset[0] -= 1
                 self.rect.right = self.settings.screen_width
         else:
             self.rect.x += self.velocity.x
-            # move camera right
 
     def update_action(self, new_action):
         # check if the new action is different from the previous one

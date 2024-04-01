@@ -6,9 +6,6 @@ from pytmx import load_pygame
 from scripts.settings import Settings
 from scripts.player import Player
 
-# from scripts.Map import Map
-
-# START
 # Use later
 vec = pg.math.Vector2  # 2 dimensional
 
