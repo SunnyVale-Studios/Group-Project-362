@@ -10,5 +10,10 @@ class Settings:
         self.move_left = 0
         self.move_right = 0
 
+        # world_offset to move the map as the player reaches the edges
+        # [x,y]; -100 allows player to see underneath more but can be changed later
+        self.world_offset = [-5, -100]
+
+
 if __name__ == "__main__":
     print("Wrong file to run game. Run game.py instead!!")
