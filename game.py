@@ -32,7 +32,6 @@ class Game:
         # initial height is set to be (screen_height - 19) to avoid upward movement at the start of the game
 
         # Pass the game instance to the Player class
-        # self.player = Player(self, 0, self.settings.screen_height - 19, 1)
         self.player = Player(self, 0, self.settings.screen_height - 19, 1)
 
         # Use a dictionary to store different types of sprites
@@ -119,6 +118,7 @@ class Game:
         for entity in self.entities.values():
             # draw bg color before each loop
             entity.draw_BG()
+            # draw the map
             self.display_map(self.screen, self.tmx_data, self.world_offset)
             # draw players
             entity.draw()
