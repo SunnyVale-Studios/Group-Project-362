@@ -2,9 +2,9 @@ import pygame as pg
 import os
 from pygame.sprite import Sprite
 from scripts.timer import Timer
-from scripts.settings import Settings
+from entities import PhysicsEntity
 
-
+'''Currently not being used right now in the moment'''
 class Player(Sprite):
     def __init__(self, game, x, y, scale):
         super().__init__()
@@ -12,7 +12,7 @@ class Player(Sprite):
         self.settings = game.settings
         self.world_offset = self.settings.world_offset
         # Set player status, use later
-        self.alive = True
+        self.alive = True # Change it to isAlive
         self.velocity = pg.Vector2(0, 0)
         # Set Jump
         self.jump = False
@@ -27,17 +27,13 @@ class Player(Sprite):
             "run": Timer(self.load_images("run", scale), "run"),
             "jump": Timer(self.load_images("jump", scale), "jump"),
         }
+
         self.current_animation = self.animations["idle"]
         # Set player location
         self.rect = self.current_animation.image().get_rect()
         self.rect.center = (x, y)
         # Set player direction
         self.direction = 1
-
-        self.map_bg = pg.transform.scale(
-            pg.image.load("./assets/Map/main_background.png").convert_alpha(),
-            (self.settings.screen_width, self.settings.screen_height),
-        )
 
     def load_images(self, animation_name, scale):
         # Define base path for player imgs
@@ -77,7 +73,7 @@ class Player(Sprite):
         # Jump setting
         if self.jump and self.in_air == False:
             # jump height
-            self.vel_y = -8
+            self.vel_y = -self.settings.jump_velocity
             # inital state
             self.jump = False
             self.in_air = True
@@ -138,10 +134,6 @@ class Player(Sprite):
             )
         else:
             self.screen.blit(self.current_animation.image(), self.rect)
-
-    def draw_BG(self):
-        # redraw backround to cover up previous animations
-        self.screen.blit(self.map_bg, (0, 0))
 
 
 if __name__ == "__main__":
