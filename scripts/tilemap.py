@@ -10,9 +10,7 @@ class Tilemap:
         self.tilemap = {}
         self.offgrid_tiles = []
         self.image = pg.Surface((16, 16), pg.SRCALPHA)
-        self.image2 = pg.Surface((16, 16), pg.SRCALPHA)
         self.image.fill((255,255,255))
-        self.image2.fill((0, 0, 255))
 
 
         for i in range(10):
