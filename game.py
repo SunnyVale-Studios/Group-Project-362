@@ -34,6 +34,7 @@ class Game:
         self.player = Player(self, (0, self.screen.get_size()[1] - 19), (8, 16))
         self.tilemap = Tilemap(self, tile_size=16)
 
+        
         # Use a dictionary to store different types of sprites
         self.entities = {
             "player": self.player,
@@ -86,7 +87,7 @@ class Game:
             self.events_checker()
             self.update_entities()
             self.draw_entities()
-
+            print(self.tilemap.physics_rects_around(self.player.pos))
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
@@ -123,6 +124,8 @@ class Game:
         # draw the map
         self.display_map(self.tmx_data, render_offset)
 
+        self.tilemap.draw(self.screen, render_offset)
+        
         for entity in self.entities.values():
             # draw players
             entity.draw(render_offset)
