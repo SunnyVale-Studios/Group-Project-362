@@ -16,12 +16,13 @@ class PhysicsEntity:
         self.isJumping = False
         self.isAlive = True # Used later to determine whether game is over
 
+        self.anim_offset = (-16, -16)
 
         # Animation list
         self.animations = {
             "idle": Timer(self.load_images("idle", self.size[1] // 16), "idle"),
             "run": Timer(self.load_images("run", self.size[1] // 16), "run"),
-            "jump": Timer(self.load_images("jump", self.size[1] // 16), "jump"),
+            "jump": Timer(self.load_images("jump", self.size[1] // 16), "jump", is_loop=False),
         }
 
         self.current_animation = self.animations["idle"]
@@ -60,14 +61,13 @@ class PhysicsEntity:
         return pg.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
     
     def update(self, tilemap, movement=(0, 0)):
-        self.colliions = {'up': False, 'down': False, 'right': False, 'left': False}
+        self.collisions = {'up': False, 'down': False, 'right': False, 'left': False}
         
         frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
 
         self.pos[0] += frame_movement[0]
         entity_rect = self.rect()
         for rect in tilemap.physics_rects_around(self.pos):
-            print(rect)
             if entity_rect.colliderect(rect):
                 if frame_movement[0] > 0:
                     entity_rect.right = rect.left
@@ -97,14 +97,14 @@ class PhysicsEntity:
 
         self.velocity[1] = min(5, self.velocity[1] + 0.1)
 
-        if self.colliions['down'] or self.colliions['up']:
+        if self.collisions['down'] or self.collisions['up']:
             self.velocity[1] = 0
 
         self.animations.update()
 
         
     def draw(self, offset=(0, 0)):
-        self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0], self.pos[1] - offset[1]) )
+        self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]) )
 
 
 class Player(PhysicsEntity):

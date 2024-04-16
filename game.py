@@ -34,20 +34,13 @@ class Game:
         self.player = Player(self, (0, self.screen.get_size()[1] - 19), (8, 16))
         self.tilemap = Tilemap(self, tile_size=16)
 
-        
-        # Use a dictionary to store different types of sprites
-        self.entities = {
-            "player": self.player,
-            # 'monster': self.monster,
-            # 'map': self.map,
-        }
-
         # Player Movement Bools
         self.moving_left = False
         self.moving_right = False
         self.movement = [False, False]
 
         self.offset = [0, 0]
+        
 
     def check_events(self):
         for event in pg.event.get():
@@ -87,7 +80,7 @@ class Game:
             self.events_checker()
             self.update_entities()
             self.draw_entities()
-            print(self.tilemap.physics_rects_around(self.player.pos))
+            
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
@@ -112,6 +105,7 @@ class Game:
             for tile in layer.tiles():
                 x_pixel = tile[0] * 16 - world_offset[0]
                 y_pixel = tile[1] * 16 - world_offset[1]
+
                 # draw surface onto the screen
                 self.screen.blit(tile[2], (x_pixel, y_pixel))
 
@@ -126,9 +120,7 @@ class Game:
 
         self.tilemap.draw(self.screen, render_offset)
         
-        for entity in self.entities.values():
-            # draw players
-            entity.draw(render_offset)
+        self.player.draw(render_offset)
 
 
 if __name__ == "__main__":
