@@ -32,3 +32,5 @@ class Timer:
         self.next_frame()
         return self.image_list[self.index]
 
+if __name__ == "__main__":
+    print("Incorrect file ran! Run python3 game.py")

@@ -15,4 +15,4 @@ class Settings:
 
 
 if __name__ == "__main__":
-    print("Wrong file to run game. Run game.py instead!!")
+    print("Incorrect file ran! Run python3 game.py")

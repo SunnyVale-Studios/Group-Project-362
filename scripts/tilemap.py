@@ -43,3 +43,6 @@ class Tilemap:
                 if loc in self.tilemap:
                     tile = self.tilemap[loc]
                     screen.blit(self.image, (tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
+
+if __name__ == "__main__":
+    print("Incorrect file ran! Run python3 game.py")

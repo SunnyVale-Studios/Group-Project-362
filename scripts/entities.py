@@ -125,3 +125,6 @@ class Player(PhysicsEntity):
             self.set_action('run')
         else:
             self.set_action('idle')
+
+if __name__ == "__main__":
+    print("Incorrect file ran! Run python3 game.py")
