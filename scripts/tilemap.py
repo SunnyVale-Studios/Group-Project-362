@@ -13,9 +13,12 @@ class Tilemap:
         self.image.fill((255,255,255))
 
 
-        for i in range(10):
-            self.tilemap[str(3 + i) + ';50'] = {'type': 'grass', 'variant': 1, 'pos': (3 + i, 50)}
-            self.tilemap['10;' + str(50 + i)] = {'type': 'stone', 'variant': 1, 'pos': (10, 50 + i)}
+        for i in range(36):
+            self.tilemap[str(i) + ';52'] = {'type': 'grass', 'variant': 1, 'pos': (i, 52)}
+            self.tilemap[str(46 +i) + ';52'] = {'type': 'grass', 'variant': 1, 'pos': (46 + i, 52)}
+            self.tilemap[str(20 + i ) + ';94'] = {'type': 'stone', 'variant': 1, 'pos': (20 + i, 94)}
+            self.tilemap['36;' + str(52 + i)] = {'type': 'grass', 'variant': 1, 'pos': (36, 52 + i)}
+            self.tilemap['46;' + str(52 + i)] = {'type': 'grass', 'variant': 1, 'pos': (46, 52 + i)}
 
     def tiles_around(self, pos):
         tiles = []

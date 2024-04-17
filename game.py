@@ -22,7 +22,6 @@ class Game:
 
         # load map
         self.tmx_data = load_pygame("./assets/Map/map_final.tmx")
-        self.world_offset = self.settings.world_offset
         self.map_bg = pg.transform.scale(pg.image.load("./assets/Map/main_background.png").convert_alpha(), (self.settings.screen_width, self.settings.screen_height),)
 
         # Create first player
@@ -52,13 +51,11 @@ class Game:
             if event.type == KEYDOWN:
                 key = event.key
                 if key == K_d or key == K_RIGHT:
-                    self.moving_right = True #OLD
                     self.movement[1] = True # New
                 if key == K_a or key == K_LEFT:
-                    self.moving_left = True #old
                     self.movement[0] = True #new
                 if key == K_SPACE:
-                    self.player.velocity.y = -3 #new
+                    self.player.velocity.y = -self.settings.jump_velocity #new
                 if key == K_q:
                     pg.quit()
                     sys.exit()
@@ -66,14 +63,9 @@ class Game:
             if event.type == KEYUP:
                 key = event.key
                 if key == K_d or key == K_RIGHT:
-                    self.moving_right = False #old
                     self.movement[1] = False #new
                 if key == K_a or key == K_LEFT:
-                    self.moving_left = False #old
                     self.movement[0] = False #new
-
-        self.settings.move_left = self.moving_left # remove
-        self.settings.move_right = self.moving_right # remove
         
     def play(self):
         while True:
@@ -93,7 +85,7 @@ class Game:
         if self.player.isAlive:
             # Update the animation
             self.player.update_animation()
-            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
+            self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.settings.x_velocity, 0))
 
             # Update boss and other items here
             # TODO
@@ -115,8 +107,8 @@ class Game:
 
         if x_diff < 0:
            self.offset[0] = 0
-        elif x_diff >= 2522:
-            self.offset[0] = 2522
+        elif x_diff >= 2520:
+            self.offset[0] = 2520
         else:
             self.offset[0] = x_diff
         
@@ -127,10 +119,6 @@ class Game:
         else:
             self.offset[1] = y_diff
                 
-        # Old Method
-        # self.offset[0] += (self.player.rect().centerx - self.settings.screen_width / 2 - self.offset[0]) / 30
-        # self.offset[1] += (self.player.rect().centery - self.settings.screen_height / 3 - self.offset[1]) / 30
-        print(self.offset)
         render_offset = (int(self.offset[0]), int(self.offset[1]))
         # draw bg color before each loop
         self.screen.blit(self.map_bg, (0, 0))
