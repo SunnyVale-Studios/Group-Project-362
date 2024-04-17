@@ -110,8 +110,27 @@ class Game:
                 self.screen.blit(tile[2], (x_pixel, y_pixel))
 
     def draw_entities(self):
-        self.offset[0] += (self.player.rect().centerx - self.settings.screen_width / 2 - self.offset[0]) / 30
-        self.offset[1] += (self.player.rect().centery - self.settings.screen_height / 3 - self.offset[1]) / 30
+        x_diff = self.offset[0] + ((self.player.rect().centerx - self.settings.screen_width / 2 - self.offset[0]) / 30)
+        y_diff = self.offset[1] + ((self.player.rect().centery - self.settings.screen_height / 2 - self.offset[1]) / 30)
+
+        if x_diff < 0:
+           self.offset[0] = 0
+        elif x_diff >= 2522:
+            self.offset[0] = 2522
+        else:
+            self.offset[0] = x_diff
+        
+        if y_diff < 0:
+            self.offset[1] = 0
+        elif y_diff >= 1120:
+            self.offset[1] = 1120
+        else:
+            self.offset[1] = y_diff
+                
+        # Old Method
+        # self.offset[0] += (self.player.rect().centerx - self.settings.screen_width / 2 - self.offset[0]) / 30
+        # self.offset[1] += (self.player.rect().centery - self.settings.screen_height / 3 - self.offset[1]) / 30
+        print(self.offset)
         render_offset = (int(self.offset[0]), int(self.offset[1]))
         # draw bg color before each loop
         self.screen.blit(self.map_bg, (0, 0))
