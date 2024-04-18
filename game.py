@@ -99,6 +99,7 @@ class Game:
             self.events_checker()
             self.update_entities()
             self.draw_entities()
+            self.draw_sprint_cooldown()
 
             pg.display.update()
             self.clock.tick(self.settings.fps)
@@ -170,6 +171,25 @@ class Game:
         self.player.draw(render_offset)
 
         self.display_foreground(self.tmx_data, render_offset)
+    
+    #Display a text on the topright corner
+    def draw_sprint_cooldown(self):
+        # Check if cooldown is over
+        if pg.time.get_ticks() - self.player.last_sprint_time < self.settings.sprint_cooldown:
+            #The color is gray out when the sprint is not ready
+            text_color = (128, 128, 128)
+        else:
+            #The color of text turn white when sprint is ready
+            text_color = (255, 255, 255)
+        
+        #Change the font later
+        font = pg.font.Font(None, 25)
+        text = font.render("Sprint Ready!", True, text_color)
+        text_rect = text.get_rect()
+        #This make sure the text do not go out of the window
+        text_rect.topright = (self.settings.screen_width - 20, 20)
+        self.screen.blit(text, text_rect)
+
 
 
 if __name__ == "__main__":
