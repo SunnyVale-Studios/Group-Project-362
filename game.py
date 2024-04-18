@@ -22,6 +22,14 @@ class Game:
 
         # load map
         self.tmx_data = load_pygame("./assets/Map/map_final.tmx")
+        print(self.tmx_data.layers)
+
+        """
+        print(self.tmx_data.layers[2].name)
+        print(self.tmx_data.layers[1].name)
+        print(self.tmx_data.layers[3].name)
+        """
+
         self.map_bg = pg.transform.scale(pg.image.load("./assets/Map/main_background.png").convert_alpha(), (self.settings.screen_width, self.settings.screen_height),)
 
         # Create first player
@@ -30,8 +38,8 @@ class Game:
         # Pass the game instance to the Player class
         # self.player = Player(self, 0, self.settings.screen_height - 19, 1)
         # OLD self.player = Player(self, 0, self.screen.get_size()[1] - 19, 1.25)
-        self.player = Player(self, (0, self.screen.get_size()[1] - 19), (8, 16))
-        self.tilemap = Tilemap(self, tile_size=16)
+        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (8, 16))
+        self.tilemap = Tilemap(self, self.tmx_data.layers[2], self.tmx_data.layers[1], self.tmx_data.layers[3], tile_size=16)
 
         # Player Movement Bools
         self.moving_left = False
@@ -113,7 +121,6 @@ class Game:
     def display_map(self, tmx_data, world_offset):
         for layer in tmx_data:
             if layer.name == "Foreground": continue
-            print(layer.data)
             # x,y,surface
 
             for tile in layer.tiles():

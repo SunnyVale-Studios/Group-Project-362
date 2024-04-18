@@ -1,24 +1,35 @@
 import pygame as pg
 
+# CHANGES NEED, THIS WILL ONLY BE USED FOR COLLISIONS AND NOT TO DRAW THE MAP
+# Refactor the tile map data, {'type': 'platform, climbable, oneway', 'pos': (i, 52)}
+# Need to remove the uneccesary types for collision, and only have the position saved for our own use.
 NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0, 0), (-1, 1) , (0, 1), (1, 1)]
-PHYSICS_TILES = {'grass', 'stone'} # set
+PHYSICS_TILES = {'platform', 'climbable', 'oneway'} # set
 class Tilemap:
-    def __init__(self, game, tile_size=16):
+    def __init__(self, game, platformLevel, climbableLevel, onewayLevel, tile_size=16):
         self.game = game
         self.settings = game.settings
         self.tile_size = tile_size
-        self.tilemap = {}
-        self.offgrid_tiles = []
+        self.tilemap = {} # Here will be the player level
+        self.platformLevel = platformLevel
+        self.climbableLevel = climbableLevel
+        self.onewayLevel = onewayLevel
         self.image = pg.Surface((16, 16), pg.SRCALPHA)
         self.image.fill((255,255,255))
 
-
-        for i in range(36):
-            self.tilemap[str(i) + ';52'] = {'type': 'grass', 'variant': 1, 'pos': (i, 52)}
-            self.tilemap[str(46 +i) + ';52'] = {'type': 'grass', 'variant': 1, 'pos': (46 + i, 52)}
-            self.tilemap[str(20 + i ) + ';94'] = {'type': 'stone', 'variant': 1, 'pos': (20 + i, 94)}
-            self.tilemap['36;' + str(52 + i)] = {'type': 'grass', 'variant': 1, 'pos': (36, 52 + i)}
-            self.tilemap['46;' + str(52 + i)] = {'type': 'grass', 'variant': 1, 'pos': (46, 52 + i)}
+        for tile in platformLevel:
+            if tile[2] != 0:
+                self.tilemap[str(tile[0]) + ';' + str(tile[1])] = {'type': 'platform', 'pos': (tile[0], tile[1])}
+        for tile in climbableLevel:
+            if tile[2] != 0:
+                self.tilemap[str(tile[0]) + ';' + str(tile[1])] = {'type': 'platform', 'pos': (tile[0], tile[1])}
+        # Remove this later
+        """ for i in range(36):
+            self.tilemap[str(i) + ';52'] = {'type': 'grass', 'pos': (i, 52)}
+            self.tilemap[str(46 +i) + ';52'] = {'type': 'grass', 'pos': (46 + i, 52)}
+            self.tilemap[str(20 + i ) + ';94'] = {'type': 'stone', 'pos': (20 + i, 94)}
+            self.tilemap['36;' + str(52 + i)] = {'type': 'grass', 'pos': (36, 52 + i)}
+            self.tilemap['46;' + str(52 + i)] = {'type': 'grass', 'pos': (46, 52 + i)} """
 
     def tiles_around(self, pos):
         tiles = []
@@ -37,9 +48,6 @@ class Tilemap:
         return rects
 
     def draw(self, screen, offset=(0, 0)):
-        for tile in self.offgrid_tiles:
-            screen.blit(self.image2, (tile['pos'][0] - offset[0], tile['pos'][1] - offset[1]))   
-
         for x in range(offset[0] // self.tile_size, (offset[0] + self.settings.screen_width) // self.tile_size + 1):
             for y in range(offset[1] // self.tile_size, (offset[1] + self.settings.screen_height) // self.tile_size + 1):
                 loc = str(x) + ';' + str(y)
