@@ -112,13 +112,27 @@ class Game:
     # display the map to the screen
     def display_map(self, tmx_data, world_offset):
         for layer in tmx_data:
+            if layer.name == "Foreground": continue
+            print(layer.data)
             # x,y,surface
+
             for tile in layer.tiles():
                 x_pixel = tile[0] * 16 - world_offset[0]
                 y_pixel = tile[1] * 16 - world_offset[1]
 
                 # draw surface onto the screen
                 self.screen.blit(tile[2], (x_pixel, y_pixel))
+
+    def display_foreground(self, tmx_data, world_offset):
+        # Lazy way to do it but its working for now
+        for layer in tmx_data:
+            if layer.name == "Foreground":
+              for tile in layer.tiles():
+                  x_pixel = tile[0] * 16 - world_offset[0]
+                  y_pixel = tile[1] * 16 - world_offset[1]
+
+                  # draw surface onto the screen
+                  self.screen.blit(tile[2], (x_pixel, y_pixel))
 
     def draw_entities(self):
         x_diff = self.offset[0] + ((self.player.rect().centerx - self.settings.screen_width / 2 - self.offset[0]) / 30)
@@ -147,6 +161,8 @@ class Game:
         # self.tilemap.draw(self.screen, render_offset)
 
         self.player.draw(render_offset)
+
+        self.display_foreground(self.tmx_data, render_offset)
 
 
 if __name__ == "__main__":
