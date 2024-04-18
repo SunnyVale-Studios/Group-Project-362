@@ -28,6 +28,7 @@ class PhysicsEntity:
             "idle": Timer(self.load_images("idle", self.size[1] // 16), "idle"),
             "run": Timer(self.load_images("run", self.size[1] // 16), "run"),
             "jump": Timer(self.load_images("jump", self.size[1] // 16), "jump", is_loop=False),
+            "sprint": Timer(self.load_images("sprint", self.size[1] // 16), "sprint"),
         }
 
         self.current_animation = self.animations["idle"]
@@ -131,9 +132,48 @@ class Player(PhysicsEntity):
     def __init__(self, game, pos, size):
         super().__init__(game, 'player', pos, size)
         self.air_time = 0 # For jumping animation
+        
+        self.last_sprint_time = 0 
+        self.is_sprinting = False
+        self.sprint_end_pos = None
+        #add a sound to notify the player when the sprint is ready
+        self.sprint_sound = pg.mixer.Sound('./assets/Sound/sprint-ready.wav')
+        #temp set the volume of the sound to 50%
+        self.sprint_sound.set_volume(0.5)
+        #a flag make sure the sound only play once
+        self.sprint_sound_played = False
+        
 
     def update(self, tilemap, movement=(0, 0)):
-        super().update(tilemap, movement=movement)
+        # Check if sprint key is pressed and cooldown is over
+        keys = pg.key.get_pressed()
+        # Sprint active when cooldown is over
+        if keys[pg.K_LSHIFT] and pg.time.get_ticks() - self.last_sprint_time > self.settings.sprint_cooldown:
+            self.is_sprinting = True
+            self.last_sprint_time = pg.time.get_ticks()
+            #set sprint end position base on sprint_distance
+            self.sprint_end_pos = self.pos[0] + self.settings.sprint_distance if not self.flip else self.pos[0] - self.settings.sprint_distance
+        #play sprint ready sound
+        if not self.is_sprinting and pg.time.get_ticks() - self.last_sprint_time > self.settings.sprint_cooldown:
+            if not self.sprint_sound_played: #check if the sound has been played
+                self.sprint_sound.play()
+                self.sprint_sound_played = True
+        #make sure the sound only play once per cooldown
+        elif self.is_sprinting or pg.time.get_ticks() - self.last_sprint_time < self.settings.sprint_cooldown:
+            self.sprint_sound_played = False
+        
+        # If sprinting, move the player in the direction they're facing
+        if self.is_sprinting:
+            #move player's location base on sprint_speed
+            self.pos[0] += self.settings.x_velocity * self.settings.sprint_speed if not self.flip else -self.settings.x_velocity * self.settings.sprint_speed
+            #set sprint termination
+            if (not self.flip and self.pos[0] >= self.sprint_end_pos) or (self.flip and self.pos[0] <= self.sprint_end_pos):
+                self.is_sprinting = False
+                self.pos[0] = self.sprint_end_pos
+            #sprint animation
+            self.set_action('sprint')
+        else:
+            super().update(tilemap, movement=movement)
 
         self.air_time += 1
         if self.collisions['down']:
