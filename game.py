@@ -37,9 +37,13 @@ class Game:
         self.moving_left = False
         self.moving_right = False
         self.movement = [False, False]
+        # TEMP DEV
+        self.up = False
+        self.down = False
+        # END DEV
 
         self.offset = [0, 0]
-        
+
 
     def check_events(self):
         for event in pg.event.get():
@@ -51,11 +55,20 @@ class Game:
             if event.type == KEYDOWN:
                 key = event.key
                 if key == K_d or key == K_RIGHT:
-                    self.movement[1] = True # New
+                    self.movement[1] = True
                 if key == K_a or key == K_LEFT:
-                    self.movement[0] = True #new
-                if key == K_SPACE:
-                    self.player.velocity.y = -self.settings.jump_velocity #new
+                    self.movement[0] = True
+                if key == K_SPACE and not self.player.isJumping:
+                    self.player.velocity.y = -self.settings.jump_velocity
+                    self.player.isJumping = True #new
+                # REMOVE AFTER DEV
+                if key == K_c: # Creative Mode to fly around
+                    self.player.creativeMode = not self.player.creativeMode
+                if key == K_w and self.player.creativeMode:
+                    self.up = True
+                if key == K_s and self.player.creativeMode:
+                    self.down = True
+                # END REMOVE
                 if key == K_q:
                     pg.quit()
                     sys.exit()
@@ -63,16 +76,22 @@ class Game:
             if event.type == KEYUP:
                 key = event.key
                 if key == K_d or key == K_RIGHT:
-                    self.movement[1] = False #new
+                    self.movement[1] = False
                 if key == K_a or key == K_LEFT:
-                    self.movement[0] = False #new
-        
+                    self.movement[0] = False
+
+                # REMOVE AFTER DEV
+                if key == K_w:
+                    self.up = False
+                if key == K_s:
+                    self.down = False
+
     def play(self):
         while True:
             self.events_checker()
             self.update_entities()
             self.draw_entities()
-            
+
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
@@ -85,7 +104,7 @@ class Game:
         if self.player.isAlive:
             # Update the animation
             self.player.update_animation()
-            self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]) * self.settings.x_velocity, 0))
+            self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]), (self.down - self.up))) # self.up - self.down is just for flying around the map
 
             # Update boss and other items here
             # TODO
@@ -111,14 +130,14 @@ class Game:
             self.offset[0] = 2520
         else:
             self.offset[0] = x_diff
-        
+
         if y_diff < 0:
             self.offset[1] = 0
         elif y_diff >= 1120:
             self.offset[1] = 1120
         else:
             self.offset[1] = y_diff
-                
+
         render_offset = (int(self.offset[0]), int(self.offset[1]))
         # draw bg color before each loop
         self.screen.blit(self.map_bg, (0, 0))
@@ -126,7 +145,7 @@ class Game:
         self.display_map(self.tmx_data, render_offset)
 
         self.tilemap.draw(self.screen, render_offset)
-        
+
         self.player.draw(render_offset)
 
 

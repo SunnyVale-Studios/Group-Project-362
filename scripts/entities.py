@@ -4,6 +4,10 @@ import os
 
 class PhysicsEntity:
     def __init__(self, game, type, pos, size):
+        '''DEVELOPMENT VARIABLES ONLY DONT KEEP IN FINAL ITERATION'''
+
+        self.creativeMode = False
+        '''END OF DEV'''
         self.game = game
         self.screen = game.screen
         self.settings = game.settings
@@ -12,6 +16,7 @@ class PhysicsEntity:
         self.pos = list(pos) # Figure out why other than just making a new variable
 
         self.velocity = pg.Vector2(0, 0)
+        self.last_velocity = pg.Vector2(0, 0)
         self.collisions = {'up': False, 'down': False, 'right': False, 'left': False}
         self.isJumping = False
         self.isAlive = True # Used later to determine whether game is over
@@ -47,24 +52,39 @@ class PhysicsEntity:
             )
             temp_list.append(img)
         return temp_list
-    
+
     def update_animation(self):
         self.current_animation.next_frame()
-    
+
     def set_action(self, action):
         # check if the new action is different from the previous one
         if action != self.current_animation.action:
             self.current_animation = self.animations[action]
             self.current_animation.reset()
-    
+
     def rect(self):
         return pg.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
-    
+
     def update(self, tilemap, movement=(0, 0)):
         self.collisions = {'up': False, 'down': False, 'right': False, 'left': False}
-        
-        frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
 
+        if self.creativeMode:
+            # This will ignore velocity and just input straight direction movement to fly around map
+            frame_movement = (movement[0] * 10, movement[1] * 10)
+        else:
+            #In-game movement phsyics
+            if movement[0] != 0:
+                # Constant velocity when user inputs movement
+                self.velocity[0] = movement[0] * self.settings.x_velocity
+
+            if self.isJumping:
+                # We want to make sure while in the air the velocity of the player is only dependent on the last velocity he was in and not the movement
+                self.velocity[0] = self.last_velocity[0] * 2
+            else:
+                self.velocity[0] = self.velocity[0] - self.settings.friction if self.velocity[0] > 0 else self.velocity[0] + self.settings.friction
+                self.last_velocity[0] = self.velocity[0]
+
+            frame_movement = (self.velocity[0], self.velocity[1])
         self.pos[0] += frame_movement[0]
         entity_rect = self.rect()
         for rect in tilemap.physics_rects_around(self.pos):
@@ -95,14 +115,17 @@ class PhysicsEntity:
         if movement[0] < 0:
             self.flip = True
 
-        self.velocity[1] = min(5, self.velocity[1] + 0.1)
+        self.velocity[1] = min(self.settings.max_gravity, self.velocity[1] + self.settings.y_velocity)
 
         if self.collisions['down'] or self.collisions['up']:
             self.velocity[1] = 0
 
+        if self.collisions['down']:
+            self.isJumping = False
+
         self.animations.update()
 
-        
+
     def draw(self, offset=(0, 0)):
         self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]) )
 
@@ -118,7 +141,7 @@ class Player(PhysicsEntity):
         self.air_time += 1
         if self.collisions['down']:
             self.air_time = 0
-        
+
         if self.air_time > 4:
             self.set_action('jump')
         elif movement[0] != 0:
