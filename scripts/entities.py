@@ -120,9 +120,6 @@ class PhysicsEntity:
         if self.collisions['down'] or self.collisions['up']:
             self.velocity[1] = 0
 
-        if self.collisions['down']:
-            self.isJumping = False
-
         self.animations.update()
 
 
@@ -141,6 +138,7 @@ class Player(PhysicsEntity):
         self.air_time += 1
         if self.collisions['down']:
             self.air_time = 0
+            self.isJumping = False
 
         if self.air_time > 4:
             self.set_action('jump')

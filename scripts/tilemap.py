@@ -20,9 +20,9 @@ class Tilemap:
         for tile in platformLevel:
             if tile[2] != 0:
                 self.tilemap[str(tile[0]) + ';' + str(tile[1])] = {'type': 'platform', 'pos': (tile[0], tile[1])}
-        for tile in climbableLevel:
+        for tile in onewayLevel:
             if tile[2] != 0:
-                self.tilemap[str(tile[0]) + ';' + str(tile[1])] = {'type': 'platform', 'pos': (tile[0], tile[1])}
+                self.tilemap[str(tile[0]) + ';' + str(tile[1])] = {'type': 'oneway', 'pos': (tile[0], tile[1])}
         # Remove this later
         """ for i in range(36):
             self.tilemap[str(i) + ';52'] = {'type': 'grass', 'pos': (i, 52)}
