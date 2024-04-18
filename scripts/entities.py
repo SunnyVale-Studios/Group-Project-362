@@ -21,7 +21,7 @@ class PhysicsEntity:
         self.isJumping = False
         self.isAlive = True # Used later to determine whether game is over
 
-        self.anim_offset = (-16, -16)
+        self.anim_offset = (-16, -20)
 
         # Animation list
         self.animations = {
