@@ -95,7 +95,7 @@ class PhysicsEntity:
     
             self.pos[0] += frame_movement[0]
             entity_rect = self.rect()
-            oneway_rects = tilemap.physics_rects_around(self.pos)
+            oneway_rects = tilemap.oneway_rects_around(self.pos)
             for rect in tilemap.physics_rects_around(self.pos):
                 if entity_rect.colliderect(rect):
                     if rect not in oneway_rects:
