@@ -151,14 +151,14 @@ class Game:
         elif x_diff >= 2520:
             self.offset[0] = 2520
         else:
-            self.offset[0] = x_diff
+            self.offset[0] = int(x_diff)
 
         if y_diff < 0:
             self.offset[1] = 0
         elif y_diff >= 1120:
             self.offset[1] = 1120
         else:
-            self.offset[1] = y_diff
+            self.offset[1] = int(y_diff)
 
         render_offset = (int(self.offset[0]), int(self.offset[1]))
         # draw bg color before each loop

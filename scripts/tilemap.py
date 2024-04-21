@@ -47,6 +47,13 @@ class Tilemap:
                 rects.append(pg.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
         return rects
 
+    def oneway_rects_around(self, pos):
+        rects = []
+        for tile in self.tiles_around(pos):
+            if tile['type'] == 'oneway':
+                rects.append(pg.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
+        return rects
+
     def draw(self, screen, offset=(0, 0)):
         for x in range(offset[0] // self.tile_size, (offset[0] + self.settings.screen_width) // self.tile_size + 1):
             for y in range(offset[1] // self.tile_size, (offset[1] + self.settings.screen_height) // self.tile_size + 1):

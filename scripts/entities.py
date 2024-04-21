@@ -66,63 +66,70 @@ class PhysicsEntity:
     def rect(self):
         return pg.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
+
+
+
     def update(self, tilemap, movement=(0, 0)):
         self.collisions = {'up': False, 'down': False, 'right': False, 'left': False}
-
+    
         if self.creativeMode:
             # This will ignore velocity and just input straight direction movement to fly around map
+            # had to add this change as adding one way change broke the logic for some reason
             frame_movement = (movement[0] * 10, movement[1] * 10)
+            self.pos[0] += frame_movement[0]
+            self.pos[1] += frame_movement[1]
         else:
-            #In-game movement phsyics
+            # In-game movement physics
             if movement[0] != 0:
                 # Constant velocity when user inputs movement
                 self.velocity[0] = movement[0] * self.settings.x_velocity
-
+    
             if self.isJumping:
-                # We want to make sure while in the air the velocity of the player is only dependent on the last velocity he was in and not the movement
+                # makes sure while in the air the velocity of the player is only dependent on the last velocity he was in and not the movement
                 self.velocity[0] = self.last_velocity[0] * 2
             else:
                 self.velocity[0] = self.velocity[0] - self.settings.friction if self.velocity[0] > 0 else self.velocity[0] + self.settings.friction
                 self.last_velocity[0] = self.velocity[0]
-
+    
             frame_movement = (self.velocity[0], self.velocity[1])
-        self.pos[0] += frame_movement[0]
-        entity_rect = self.rect()
-        for rect in tilemap.physics_rects_around(self.pos):
-            if entity_rect.colliderect(rect):
-                if frame_movement[0] > 0:
-                    entity_rect.right = rect.left
-                    self.collisions['right'] = True
-                if frame_movement[0] < 0:
-                    entity_rect.left = rect.right
-                    self.collisions['left'] = True
-                self.pos[0] = entity_rect.x
-
-        self.pos[1] += frame_movement[1]
-        entity_rect = self.rect()
-        for rect in tilemap.physics_rects_around(self.pos):
-            if entity_rect.colliderect(rect):
-                if frame_movement[1] > 0:
-                    entity_rect.bottom = rect.top
-                    self.collisions['down'] = True
-                if frame_movement[1] < 0:
-                    entity_rect.top = rect.bottom
-                    self.collisions['up'] = True
-                self.pos[1] = entity_rect.y
-
-
+    
+            self.pos[0] += frame_movement[0]
+            entity_rect = self.rect()
+            for rect in tilemap.physics_rects_around(self.pos):
+                if entity_rect.colliderect(rect):
+                    if frame_movement[0] > 0:
+                        entity_rect.right = rect.left
+                        self.collisions['right'] = True
+                    if frame_movement[0] < 0:
+                        entity_rect.left = rect.right
+                        self.collisions['left'] = True
+                    self.pos[0] = entity_rect.x
+    
+            self.pos[1] += frame_movement[1]
+            entity_rect = self.rect()
+            oneway_rects = tilemap.oneway_rects_around(self.pos)
+            for rect in tilemap.physics_rects_around(self.pos):
+                if entity_rect.colliderect(rect):
+                    if rect not in oneway_rects or self.velocity[1] >= 0:
+                        if frame_movement[1] > 0:
+                            entity_rect.bottom = rect.top
+                            self.collisions['down'] = True
+                        if frame_movement[1] < 0:
+                            entity_rect.top = rect.bottom
+                            self.collisions['up'] = True
+                        self.pos[1] = entity_rect.y
+    
         if movement[0] > 0:
             self.flip = False
         if movement[0] < 0:
             self.flip = True
-
+    
         self.velocity[1] = min(self.settings.max_gravity, self.velocity[1] + self.settings.y_velocity)
-
+    
         if self.collisions['down'] or self.collisions['up']:
             self.velocity[1] = 0
-
+    
         self.animations.update()
-
 
     def draw(self, offset=(0, 0)):
         self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]) )
