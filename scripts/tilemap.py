@@ -1,8 +1,4 @@
-import pygame as pg
-
-# CHANGES NEED, THIS WILL ONLY BE USED FOR COLLISIONS AND NOT TO DRAW THE MAP
-# Refactor the tile map data, {'type': 'platform, climbable, oneway', 'pos': (i, 52)}
-# Need to remove the uneccesary types for collision, and only have the position saved for our own use.
+import pygame as pg 
 NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0, 0), (-1, 1) , (0, 1), (1, 1)]
 PHYSICS_TILES = {'platform', 'climbable', 'oneway'} # set
 class Tilemap:
@@ -23,13 +19,9 @@ class Tilemap:
         for tile in onewayLevel:
             if tile[2] != 0:
                 self.tilemap[str(tile[0]) + ';' + str(tile[1])] = {'type': 'oneway', 'pos': (tile[0], tile[1])}
-        # Remove this later
-        """ for i in range(36):
-            self.tilemap[str(i) + ';52'] = {'type': 'grass', 'pos': (i, 52)}
-            self.tilemap[str(46 +i) + ';52'] = {'type': 'grass', 'pos': (46 + i, 52)}
-            self.tilemap[str(20 + i ) + ';94'] = {'type': 'stone', 'pos': (20 + i, 94)}
-            self.tilemap['36;' + str(52 + i)] = {'type': 'grass', 'pos': (36, 52 + i)}
-            self.tilemap['46;' + str(52 + i)] = {'type': 'grass', 'pos': (46, 52 + i)} """
+        for tile in climbableLevel:
+            if tile[2] != 0:
+                self.tilemap[str(tile[0]) + ';' + str(tile[1])] = {'type': 'climbable', 'pos': (tile[0], tile[1])}
 
     def tiles_around(self, pos):
         tiles = []
@@ -43,15 +35,15 @@ class Tilemap:
     def physics_rects_around(self, pos):
         rects = []
         for tile in self.tiles_around(pos):
-            if tile['type'] in PHYSICS_TILES:
+            if tile['type'] == 'platform' or tile['type'] == 'oneway':  # Only include platform tiles for collision
                 rects.append(pg.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
         return rects
 
     def oneway_rects_around(self, pos):
         rects = []
         for tile in self.tiles_around(pos):
-            if tile['type'] == 'oneway':
-                rects.append(pg.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
+            if tile['type'] == 'oneway' and not tile['type'] == 'climbable':
+                rects.append(pg.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size , self.tile_size, self.tile_size))
         return rects
 
     def draw(self, screen, offset=(0, 0)):
@@ -63,4 +55,5 @@ class Tilemap:
                     screen.blit(self.image, (tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
 
 if __name__ == "__main__":
+    print("Incorrect file ran! Run python3 game.py")   
     print("Incorrect file ran! Run python3 game.py")

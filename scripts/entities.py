@@ -151,6 +151,7 @@ class Player(PhysicsEntity):
         self.sprint_sound.set_volume(0.5)
         #a flag make sure the sound only play once
         self.sprint_sound_played = False
+        self.on_ladder = False
         
 
     def update(self, tilemap, movement=(0, 0)):
@@ -171,8 +172,22 @@ class Player(PhysicsEntity):
         elif self.is_sprinting or pg.time.get_ticks() - self.last_sprint_time < self.settings.sprint_cooldown:
             self.sprint_sound_played = False
         
-        # If sprinting, move the player in the direction they're facing
-        if self.is_sprinting:
+
+        if not self.is_sprinting:
+            # Check if the player is on a climbable tile
+            if any(tile['type'] == 'climbable' for tile in tilemap.tiles_around(self.pos)):
+                self.on_ladder = True
+            else:
+                self.on_ladder = False
+
+            if not self.on_ladder:
+                # Player is not on a climbable tile, apply regular movement
+                super().update(tilemap, movement=movement)
+            else:
+                # Player is on a climbable tile, allow movement onto the ladder
+                self.pos[0] += movement[0] * self.settings.x_velocity
+                self.pos[1] += self.velocity[1]
+        else:
             #move player's location base on sprint_speed
             self.pos[0] += self.settings.x_velocity * self.settings.sprint_speed if not self.flip else -self.settings.x_velocity * self.settings.sprint_speed
             #set sprint termination
@@ -181,8 +196,6 @@ class Player(PhysicsEntity):
                 self.pos[0] = self.sprint_end_pos
             #sprint animation
             self.set_action('sprint')
-        else:
-            super().update(tilemap, movement=movement)
 
         self.air_time += 1
         if self.collisions['down']:
@@ -195,6 +208,12 @@ class Player(PhysicsEntity):
             self.set_action('run')
         else:
             self.set_action('idle')
+        
+    def update_ladder(self, vertical_movement):
+        if self.on_ladder:
+            # Player is on a climbable tile, allow vertical movement
+            self.pos[1] += vertical_movement * self.settings.climb_speed
+            self.velocity[1] = 0  # Reset vertical velocity to prevent gravity from affecting the player on the ladder
 
 if __name__ == "__main__":
     print("Incorrect file ran! Run python3 game.py")
