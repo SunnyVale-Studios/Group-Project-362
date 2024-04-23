@@ -22,7 +22,6 @@ class Game:
 
         # load map
         self.tmx_data = load_pygame("./assets/Map/map_final.tmx")
-        print(self.tmx_data.layers)
 
         """
         print(self.tmx_data.layers[2].name)
@@ -99,9 +98,9 @@ class Game:
                 if key == K_a or key == K_LEFT:
                     self.movement[0] = False
 
-                if key == K_UP and self.player.on_ladder:
+                if key == K_UP:
                     self.movement[2] = False
-                if key == K_DOWN and self.player.on_ladder:
+                if key == K_DOWN:
                     self.movement[3] = False
 
                 # REMOVE AFTER DEV
