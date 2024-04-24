@@ -190,7 +190,7 @@ class Game:
         self.player.draw(render_offset)
 
         self.display_foreground(self.tmx_data, render_offset)
-    
+
     #Display a text on the topright corner
     def draw_sprint_cooldown(self):
         # Check if cooldown is over
@@ -200,7 +200,7 @@ class Game:
         else:
             #The color of text turn white when sprint is ready
             text_color = (255, 255, 255)
-        
+
         #Change the font later
         font = pg.font.Font(None, 25)
         text = font.render("Sprint Ready!", True, text_color)
