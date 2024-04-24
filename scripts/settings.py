@@ -11,6 +11,7 @@ class Settings:
         self.sprint_distance = 80 #change sprint distance
         self.sprint_speed = 3 #sprinting spped
         self.sprint_cooldown = 3000 #sprint cooldown - 3 seconds
+        self.climb_speed = 3
        
 
 if __name__ == "__main__":

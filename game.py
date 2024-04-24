@@ -43,7 +43,8 @@ class Game:
         # Player Movement Bools
         self.moving_left = False
         self.moving_right = False
-        self.movement = [False, False]
+        # left, right, up, down
+        self.movement = [False, False, False, False]
         # TEMP DEV
         self.up = False
         self.down = False
@@ -76,6 +77,16 @@ class Game:
                 if key == K_s and self.player.creativeMode:
                     self.down = True
                 # END REMOVE
+
+
+
+                if key == K_UP and self.player.on_ladder:
+                    self.movement[2] = True
+                if key == K_DOWN and self.player.on_ladder:
+                    self.movement[3] = True
+
+
+
                 if key == K_q:
                     pg.quit()
                     sys.exit()
@@ -86,6 +97,11 @@ class Game:
                     self.movement[1] = False
                 if key == K_a or key == K_LEFT:
                     self.movement[0] = False
+
+                if key == K_UP:
+                    self.movement[2] = False
+                if key == K_DOWN:
+                    self.movement[3] = False
 
                 # REMOVE AFTER DEV
                 if key == K_w:
@@ -113,6 +129,10 @@ class Game:
             # Update the animation
             self.player.update_animation()
             self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]), (self.down - self.up))) # self.up - self.down is just for flying around the map
+
+
+            if self.player.on_ladder:
+                self.player.update_ladder(self.movement[3] - self.movement[2])  # Update ladder movement separately
 
             # Update boss and other items here
             # TODO
@@ -150,14 +170,14 @@ class Game:
         elif x_diff >= 2520:
             self.offset[0] = 2520
         else:
-            self.offset[0] = x_diff
+            self.offset[0] = int(x_diff)
 
         if y_diff < 0:
             self.offset[1] = 0
         elif y_diff >= 1120:
             self.offset[1] = 1120
         else:
-            self.offset[1] = y_diff
+            self.offset[1] = int(y_diff)
 
         render_offset = (int(self.offset[0]), int(self.offset[1]))
         # draw bg color before each loop
@@ -195,3 +215,4 @@ if __name__ == "__main__":
     """Call py game.py to initiate and run the game"""
     level = Game()
     level.play()
+ 
