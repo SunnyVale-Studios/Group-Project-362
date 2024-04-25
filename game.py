@@ -1,15 +1,20 @@
 import pygame as pg
 import sys
+import random
+
 from pygame.locals import *
 from pytmx import load_pygame
 
 from scripts.settings import Settings
 from scripts.entities import Player
 from scripts.tilemap import Tilemap
-
-
-
 from scripts.utils import load_books
+
+
+
+
+
+
 
 # Use later
 vec = pg.math.Vector2  # 2 dimensional
@@ -54,6 +59,15 @@ class Game:
         # END DEV
 
         self.offset = [0, 0]
+        self.books = load_books()
+        self.book_coords_list = [(1359,640), (368, 1152), (53, 1152), (187, 1856), (690,1728), 
+                         (2101,1712), (1883, 1456), (2560,1657), (3438, 1872), 
+                         (3150, 1408),(3384,848), (2848,768), (2825,552), (2436,512), (2800,284)]
+        self.book_coords = random.sample(self.book_coords_list,8)
+        self.collected_books = [False] * 8
+    
+        self.total_collected_books = 0
+    
 
 
     def check_events(self):
@@ -123,11 +137,6 @@ class Game:
             self.clock.tick(self.settings.fps)
 
 
-
-            #TODO: manually get x,y locations for books
-            # print (x,y) location
-            print(f'{int(self.player.pos[0])},{int(self.player.pos[1])}')
-
     def events_checker(self):
         # Check events
         self.check_events()
@@ -193,13 +202,28 @@ class Game:
         self.screen.blit(self.map_bg, (0, 0))
 
 
-        self.book = load_books()
-        self.screen.blit(self.book, (50,50))
-
         # draw the map
         self.display_map(self.tmx_data, render_offset)
 
-        # self.tilemap.draw(self.screen, render_offset)
+
+
+
+
+        # Display books on screen
+        # TODO: find way to remove when player collects a book
+        for i, coord in enumerate(self.book_coords):
+            if not self.collected_books[i]:
+                adjusted_coord = (coord[0] - render_offset[0], coord[1] - render_offset[1])
+                book_rect = self.books[i].get_rect(center=adjusted_coord)
+                self.screen.blit(self.books[i], book_rect)
+                
+                if self.player.rect().colliderect(book_rect):
+                    self.collected_books[i] = True
+                    self.total_collected_books += 1
+
+
+
+
 
         self.player.draw(render_offset)
 

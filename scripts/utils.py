@@ -23,9 +23,11 @@ def load_images( animation_name, scale):
 
 def load_books():
     Book_Path = "assets/Collectables/book.png"
-    # optimizes image when loading
-    img = pg.image.load(Book_Path).convert()
-    img.set_colorkey((0, 0, 0))
-    return img
+    book_images = []
+    for _ in range(8):
+        img = pg.image.load(Book_Path).convert()
+        img.set_colorkey((0, 0, 0))
+        book_images.append(img)
+    return book_images
 
 
