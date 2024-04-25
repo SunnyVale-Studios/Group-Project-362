@@ -8,6 +8,9 @@ from scripts.entities import Player
 from scripts.tilemap import Tilemap
 
 
+
+from scripts.utils import load_books
+
 # Use later
 vec = pg.math.Vector2  # 2 dimensional
 
@@ -119,6 +122,12 @@ class Game:
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
+
+
+            #TODO: manually get x,y locations for books
+            # print (x,y) location
+            print(f'{int(self.player.pos[0])},{int(self.player.pos[1])}')
+
     def events_checker(self):
         # Check events
         self.check_events()
@@ -182,6 +191,11 @@ class Game:
         render_offset = (int(self.offset[0]), int(self.offset[1]))
         # draw bg color before each loop
         self.screen.blit(self.map_bg, (0, 0))
+
+
+        self.book = load_books()
+        self.screen.blit(self.book, (50,50))
+
         # draw the map
         self.display_map(self.tmx_data, render_offset)
 
