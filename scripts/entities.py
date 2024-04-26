@@ -96,15 +96,25 @@ class PhysicsEntity:
             self.pos[0] += frame_movement[0]
             entity_rect = self.rect()
             oneway_rects = tilemap.oneway_rects_around(self.pos)
+            slope_rects = tilemap.slope_rects_around(self.pos)
+            print(slope_rects)
             for rect in tilemap.physics_rects_around(self.pos):
                 if entity_rect.colliderect(rect):
                     if rect not in oneway_rects:
                         if frame_movement[0] > 0:
-                            entity_rect.right = rect.left
-                            self.collisions['right'] = True
+                            if rect in slope_rects:
+                                print("Slope Right")
+                                entity_rect.bottom = rect.top
+                            else:
+                                entity_rect.right = rect.left
+                                self.collisions['right'] = True
                         if frame_movement[0] < 0:
-                            entity_rect.left = rect.right
-                            self.collisions['left'] = True
+                            if rect in slope_rects:
+                                print("Slope Left")
+                                entity_rect.bottom = rect.top
+                            else:
+                                entity_rect.left = rect.right
+                                self.collisions['left'] = True
                         self.pos[0] = entity_rect.x
 
             self.pos[1] += frame_movement[1]

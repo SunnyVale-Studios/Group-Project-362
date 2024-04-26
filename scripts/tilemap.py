@@ -1,5 +1,6 @@
 import pygame as pg 
 NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (-1, 1), (-1, 2), (0, -1), (0, 0), (0, 1), (0, 2), (1, -1), (1, 0), (1, 1), (1, 2)]
+SIDE_OFFSETS = [(-1, 0), (-1, 1), (1, 0), (1, 1)]
 PHYSICS_TILES = {'platform', 'climbable', 'oneway'} # set
 class Tilemap:
     def __init__(self, game, platformLevel, climbableLevel, onewayLevel, tile_size=16):
@@ -31,6 +32,18 @@ class Tilemap:
             if check_loc in self.tilemap:
                 tiles.append(self.tilemap[check_loc])
         return tiles
+    
+    def side_tiles_around(self, pos):
+        tiles = []
+        tile_loc = (int(pos[0] // self.tile_size), int(pos[1] // self.tile_size))
+        # Right 2 block wall ignore
+        for x in range(-1, 2):
+            check_loc = str(tile_loc[0] + x) + ';' + str(tile_loc[1])
+            if check_loc not in self.tilemap:
+                check_loc = str(tile_loc[0] + x) + ';' + str(tile_loc[1] + 1)
+                if check_loc in self.tilemap:
+                    tiles.append(self.tilemap[check_loc])
+        return tiles
 
     def physics_rects_around(self, pos):
         rects = []
@@ -44,6 +57,13 @@ class Tilemap:
         for tile in self.tiles_around(pos):
             if tile['type'] == 'oneway' and not tile['type'] == 'climbable':
                 rects.append(pg.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size , self.tile_size, self.tile_size))
+        return rects
+
+    def slope_rects_around(self, pos):
+        rects = []
+        for tile in self.side_tiles_around(pos):
+            if tile['type'] == 'platform':
+                rects.append(pg.Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
         return rects
 
     def draw(self, screen, offset=(0, 0)):
