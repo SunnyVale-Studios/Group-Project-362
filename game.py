@@ -37,7 +37,7 @@ class Game:
         # Pass the game instance to the Player class
         # self.player = Player(self, 0, self.settings.screen_height - 19, 1)
         # OLD self.player = Player(self, 0, self.screen.get_size()[1] - 19, 1.25)
-        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (8, 16))
+        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (16, 32))
         self.tilemap = Tilemap(self, self.tmx_data.layers[2], self.tmx_data.layers[1], self.tmx_data.layers[3], tile_size=16)
 
         # Player Movement Bools

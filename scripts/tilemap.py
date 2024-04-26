@@ -1,5 +1,5 @@
 import pygame as pg 
-NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0, 0), (-1, 1) , (0, 1), (1, 1)]
+NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (-1, 1), (-1, 2), (0, -1), (0, 0), (0, 1), (0, 2), (1, -1), (1, 0), (1, 1), (1, 2)]
 PHYSICS_TILES = {'platform', 'climbable', 'oneway'} # set
 class Tilemap:
     def __init__(self, game, platformLevel, climbableLevel, onewayLevel, tile_size=16):
@@ -56,4 +56,3 @@ class Tilemap:
 
 if __name__ == "__main__":
     print("Incorrect file ran! Run python3 game.py")   
-    print("Incorrect file ran! Run python3 game.py")
