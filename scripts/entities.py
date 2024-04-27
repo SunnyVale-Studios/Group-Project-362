@@ -102,14 +102,14 @@ class PhysicsEntity:
                 if entity_rect.colliderect(rect):
                     if rect not in oneway_rects:
                         if frame_movement[0] > 0:
-                            if rect in slope_rects:
+                            if rect in slope_rects and not self.isJumping:
                                 print("Slope Right")
                                 entity_rect.bottom = rect.top
                             else:
                                 entity_rect.right = rect.left
                                 self.collisions['right'] = True
                         if frame_movement[0] < 0:
-                            if rect in slope_rects:
+                            if rect in slope_rects and not self.isJumping:
                                 print("Slope Left")
                                 entity_rect.bottom = rect.top
                             else:
@@ -145,7 +145,8 @@ class PhysicsEntity:
 
     def draw(self, offset=(0, 0)):
         self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
-
+        # DEV Player Hit Box
+        # pg.draw.rect(self.screen, (255, 0, 0), (self.pos[0] - offset[0], self.pos[1] - offset[1], self.rect().width, self.rect().height))
 class Player(PhysicsEntity):
     def __init__(self, game, pos, size):
         super().__init__(game, 'player', pos, size)

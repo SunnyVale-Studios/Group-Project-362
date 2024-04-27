@@ -185,7 +185,8 @@ class Game:
         # draw the map
         self.display_map(self.tmx_data, render_offset)
 
-        # self.tilemap.draw(self.screen, render_offset)
+        # Dev View platform hitbox
+        #self.tilemap.draw(self.screen, render_offset)
 
         self.player.draw(render_offset)
 
