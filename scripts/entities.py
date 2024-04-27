@@ -43,10 +43,13 @@ class PhysicsEntity:
             self.current_animation = self.animations[action]
             self.current_animation.reset()
 
-    def rect(self):
-        return pg.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
+    # def rect(self):
+    #     return pg.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
 
+    # used for collecting books bc default rect was not working
+    def rect(self, offset=(0,0)):
+        return pg.Rect(self.pos[0] - offset[0], self.pos[1]-offset[1], self.size[0], self.size[1])
 
 
     def update(self, tilemap, movement=(0, 0)):
@@ -194,6 +197,9 @@ class Player(PhysicsEntity):
             # Player is on a climbable tile, allow vertical movement
             self.pos[1] += vertical_movement * self.settings.climb_speed
             self.velocity[1] = 0  # Reset vertical velocity to prevent gravity from affecting the player on the ladder
+
+    def rect(self, offset=(0, 0)):
+        return super().rect(offset)
 
 if __name__ == "__main__":
     print("Incorrect file ran! Run python3 game.py")

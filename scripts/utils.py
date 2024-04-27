@@ -21,13 +21,3 @@ def load_images( animation_name, scale):
             temp_list.append(img)
         return temp_list
 
-def load_books():
-    Book_Path = "assets/Collectables/book.png"
-    book_images = []
-    for _ in range(8):
-        img = pg.image.load(Book_Path).convert()
-        img.set_colorkey((0, 0, 0))
-        book_images.append(img)
-    return book_images
-
-
