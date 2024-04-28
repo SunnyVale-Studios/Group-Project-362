@@ -189,7 +189,7 @@ class Game:
 
         # Display books on screen
         player_rect = self.player.rect()
-        self.book_manager.remove_collected_book(player_rect)
+        self.book_manager.update(player_rect)
         self.book_manager.draw(self.screen, render_offset)
 
         self.player.draw(render_offset)

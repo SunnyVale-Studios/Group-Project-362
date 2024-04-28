@@ -22,7 +22,7 @@ class BookManager:
         for coord in self.book_coords:
             self.books.add(Book(coord))
 
-    def remove_collected_book(self, player_rect):
+    def update(self, player_rect):
         for book in self.books:
             if player_rect.colliderect(book.rect):
                 book_index = self.book_coords.index(book.rect.center)
