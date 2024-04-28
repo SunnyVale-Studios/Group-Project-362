@@ -56,4 +56,4 @@ class Tilemap:
 
 if __name__ == "__main__":
     print("Incorrect file ran! Run python3 game.py")   
-    print("Incorrect file ran! Run python3 game.py")
+

@@ -1,9 +1,9 @@
 import pygame as pg
 import random
 
-BOOK_COORDS_LIST = [(1359,640), (368, 1152), (53, 1152), (187, 1856), (690,1728), 
-                    (2101,1712), (1883, 1456), (2560,1657), (3438, 1872), 
-                    (3150, 1408),(3384,848), (2848,768), (2825,552), (2436,512), (2800,284)]
+BOOK_COORDS_LIST = [(1359,640), (368, 1152), (53, 1152), (196, 1836), (686,1718), 
+                    (2101,1712), (1883, 1456), (2560,1657), (3436, 1858), 
+                    (3152, 1398),(3395,830), (2848,768), (2825,552), (2436,512), (2800,284)]
 
 class Book(pg.sprite.Sprite):
     def __init__(self, pos):
@@ -22,12 +22,12 @@ class BookManager:
         for coord in self.book_coords:
             self.books.add(Book(coord))
 
-    def update(self, player_rect, offset):
-        for i, book in enumerate(self.books):
-            if not self.collected_books[i]:
-                adjusted_book_rect = book.rect.move(-offset[0], -offset[1])
-                if player_rect.colliderect(adjusted_book_rect):
-                    self.collected_books[i] = True
+    def remove_collected_book(self, player_rect):
+        for book in self.books:
+            if player_rect.colliderect(book.rect):
+                book_index = self.book_coords.index(book.rect.center)
+                if not self.collected_books[book_index]:
+                    self.collected_books[book_index] = True
                     self.total_collected_books += 1
                     book.kill()
 
@@ -35,3 +35,15 @@ class BookManager:
         for book in self.books:
             adjusted_rect = book.rect.move(-offset[0], -offset[1])
             screen.blit(book.image, adjusted_rect)
+
+    def reset(self):
+        self.books.empty()
+        self.total_collected_books = 0
+        books_to_spawn = 8
+        book_coords = random.sample(BOOK_COORDS_LIST, books_to_spawn)
+        for coords in book_coords:
+            self.books.add(Book(coords))
+
+    # returns true if all books are collected
+    def all_books_collected(self):
+        return all(self.collected_books)

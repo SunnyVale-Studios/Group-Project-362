@@ -39,7 +39,7 @@ class Game:
         # Pass the game instance to the Player class
         # self.player = Player(self, 0, self.settings.screen_height - 19, 1)
         # OLD self.player = Player(self, 0, self.screen.get_size()[1] - 19, 1.25)
-        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (8, 16))
+        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (16, 16))
         self.tilemap = Tilemap(self, self.tmx_data.layers[2], self.tmx_data.layers[1], self.tmx_data.layers[3], tile_size=16)
 
         # Player Movement Bools
@@ -130,13 +130,10 @@ class Game:
             self.player.update_animation()
             self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]), (self.down - self.up))) # self.up - self.down is just for flying around the map
 
-
             if self.player.on_ladder:
                 self.player.update_ladder(self.movement[3] - self.movement[2])  # Update ladder movement separately
 
-            
-            player_rect = self.player.rect()
-            self.book_manager.update(player_rect, self.offset)
+        
             # Update boss and other items here
             # TODO
 
@@ -191,10 +188,9 @@ class Game:
         self.display_map(self.tmx_data, render_offset)
 
         # Display books on screen
-        player_rect = self.player.rect(render_offset)
-        self.book_manager.update(player_rect, render_offset)
+        player_rect = self.player.rect()
+        self.book_manager.remove_collected_book(player_rect)
         self.book_manager.draw(self.screen, render_offset)
-
 
         self.player.draw(render_offset)
 
@@ -221,7 +217,11 @@ class Game:
         books_text = font.render(f"Books Collected: {self.book_manager.total_collected_books}", True, (255, 255, 255))
         books_text_rect = books_text.get_rect(topright=(self.settings.screen_width - 20, 50))
         self.screen.blit(books_text, books_text_rect)
-
+    
+    def reset_game(self):
+        # should reset books
+        # if needed, otherwise delete later
+       self.book_manager.reset()
 
 if __name__ == "__main__":
     """Call py game.py to initiate and run the game"""

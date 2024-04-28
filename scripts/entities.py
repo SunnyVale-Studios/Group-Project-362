@@ -169,6 +169,17 @@ class Player(PhysicsEntity):
             else:
                 # Player is on a climbable tile, allow movement onto the ladder
                 self.pos[0] += movement[0] * self.settings.x_velocity
+
+                # Check for collisions with platform tiles while on a ladder
+                entity_rect = self.rect()
+                for rect in tilemap.physics_rects_around(self.pos):
+                    if entity_rect.colliderect(rect) and rect.top < self.pos[1] < rect.bottom:
+                        # Player collides with a platform tile while on a ladder
+                        if movement[1] < 0:  # Moving upward
+                            entity_rect.top = rect.bottom
+                        elif movement[1] > 0:  # Moving downward
+                            entity_rect.bottom = rect.top
+                        self.pos[1] = entity_rect.y
                 self.pos[1] += self.velocity[1]
         else:
             #move player's location base on sprint_speed
@@ -196,7 +207,12 @@ class Player(PhysicsEntity):
         if self.on_ladder:
             # Player is on a climbable tile, allow vertical movement
             self.pos[1] += vertical_movement * self.settings.climb_speed
-            self.velocity[1] = 0  # Reset vertical velocity to prevent gravity from affecting the player on the ladder
+            # Reset vertical velocity to prevent gravity from affecting the player on the ladder
+            self.velocity[1] = 0 
+
+            if self.pos[0] > 3473:
+                self.pos[0] = 3473
+
 
     def rect(self, offset=(0, 0)):
         return super().rect(offset)
