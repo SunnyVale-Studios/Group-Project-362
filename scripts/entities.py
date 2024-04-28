@@ -216,6 +216,84 @@ class Player(PhysicsEntity):
 
     def rect(self, offset=(0, 0)):
         return super().rect(offset)
+    
+    def check_collision_with_boss(self, boss):
+        return self.rect().colliderect(boss.rect())
+
+class Boss(PhysicsEntity):
+    def __init__(self, game, player, pos, size):
+        super().__init__(game, 'boss', pos, size)
+        self.player = player
+        self.boost_end_time = 0
+        self.cooldown_end_time = 0
+        self.is_boosted = False
+
+        # Animation list
+        self.boss_animations = {
+            "walk": Timer(self.load_boss_images("walk", self.size[1] // 16), "walk"),
+        }
+
+        self.current_animation = self.boss_animations["walk"]
+        self.flip = False
+        self.start_chasing_time = pg.time.get_ticks() + 5000
+
+    def load_boss_images(self, boss_animation_name, scale):
+        # Define base path for boss imgs
+        Base_Boss_Path = "assets/Boss/Walk/"
+        # Load all images for the boss
+        temp_list = []
+        # Count number of files in the folder
+        boss_num_of_frames = 16  # There are 16 frames for the boss animation
+        for i in range(boss_num_of_frames):
+            # Load boss img
+            boss_img = pg.image.load(
+                Base_Boss_Path
+                + f"boss-{boss_animation_name}-{str(i).zfill(2)}-1.3.png"
+            ).convert_alpha()
+            # Scale boss img if needed
+            boss_img = pg.transform.scale(
+                boss_img, (int(boss_img.get_width() * scale), int(boss_img.get_height() * scale))
+            )
+            temp_list.append(boss_img)
+        return temp_list
+    
+    def update(self):
+        if pg.time.get_ticks() >= self.start_chasing_time:
+            direction = pg.Vector2(self.player.pos) - pg.Vector2(self.pos)
+            distance = direction.length()
+            speed = self.settings.boss_speed
+            current_time = pg.time.get_ticks()
+            
+            if distance > 0:
+                direction = direction.normalize()
+            
+            #Boss boost if distance exceeds 400 and cooldown is over
+            if distance > 400 and current_time > self.cooldown_end_time and not self.is_boosted:
+                self.boost_end_time = current_time + self.settings.boost_duration
+                self.is_boosted = True
+            #After boosting, enter cooldown
+            if self.is_boosted and current_time > self.boost_end_time:
+                self.cooldown_end_time = current_time + self.settings.boost_cooldown
+                self.is_boosted = False
+            #If boosting, increase speed
+            #TODO: add sound effect when boss start boosting
+            if self.is_boosted:
+                speed += self.settings.boss_speed_boost
+            #Speed return to normal is distance less than 100
+            if distance < 100:
+                speed = self.settings.boss_speed
+                
+            #Update boss's position
+            self.pos[0] += direction.x * speed
+            self.pos[1] += direction.y * speed
+            
+            #Flip the boss's imgs depends on the player's position
+            self.flip = self.player.pos[0] < self.pos[0]
+            
+            print(f"Current distance to player: {distance}")
+            print(f"Current speed: {speed}")
+            
+        self.update_animation()
 
 if __name__ == "__main__":
     print("Incorrect file ran! Run python3 game.py")
