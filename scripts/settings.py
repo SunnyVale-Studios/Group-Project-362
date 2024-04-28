@@ -12,6 +12,10 @@ class Settings:
         self.sprint_speed = 3 #sprinting spped
         self.sprint_cooldown = 3000 #sprint cooldown - 3 seconds
         self.climb_speed = 3
+        self.boss_speed = 3 
+        self.boss_speed_boost = 3 #boss additional boosting speed
+        self.boost_duration = 3000 #boss boost duration is 3 seconds
+        self.boost_cooldown = 30000 #boss boost cooldown is 30 seconds
        
 
 if __name__ == "__main__":
