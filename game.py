@@ -187,7 +187,8 @@ class Game:
         # draw the map
         self.display_map(self.tmx_data, render_offset)
         
-        self.tilemap.draw(self.screen, render_offset)
+        # DEV MODE enable map collision mode
+        # self.tilemap.draw(self.screen, render_offset)
         # Display books on screen
         player_rect = self.player.rect()
         self.book_manager.update(player_rect)
