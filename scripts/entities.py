@@ -21,14 +21,14 @@ class PhysicsEntity:
         self.isJumping = False
         self.isAlive = True # Used later to determine whether game is over
 
-        self.anim_offset = (-16, -20)
+        self.anim_offset = (-16,-3)
 
         # Animation list
         self.animations = {
-            "idle": Timer(load_images("idle", self.size[1] // 16), "idle"),
-            "run": Timer(load_images("run", self.size[1] // 16), "run"),
-            "jump": Timer(load_images("jump", self.size[1] // 16), "jump", is_loop=False),
-            "sprint": Timer(load_images("sprint", self.size[1] // 16), "sprint"),
+            "idle": Timer(load_images("idle", self.size[1] // 32), "idle"),
+            "run": Timer(load_images("run", self.size[1] // 32), "run"),
+            "jump": Timer(load_images("jump", self.size[1] // 32), "jump", is_loop=False),
+            "sprint": Timer(load_images("sprint", self.size[1] // 32), "sprint"),
         }
 
         self.current_animation = self.animations["idle"]
@@ -75,21 +75,30 @@ class PhysicsEntity:
                 self.last_velocity[0] = self.velocity[0]
     
             frame_movement = (self.velocity[0], self.velocity[1])
-    
+
             self.pos[0] += frame_movement[0]
             entity_rect = self.rect()
             oneway_rects = tilemap.oneway_rects_around(self.pos)
+            slope_rects = tilemap.slope_rects_around(self.pos) if not self.isJumping else []
             for rect in tilemap.physics_rects_around(self.pos):
                 if entity_rect.colliderect(rect):
                     if rect not in oneway_rects:
                         if frame_movement[0] > 0:
-                            entity_rect.right = rect.left
-                            self.collisions['right'] = True
+                            if rect in slope_rects:
+                                print("Slope Right")
+                                entity_rect.bottom = rect.top
+                            else:
+                                entity_rect.right = rect.left
+                                self.collisions['right'] = True
                         if frame_movement[0] < 0:
-                            entity_rect.left = rect.right
-                            self.collisions['left'] = True
+                            if rect in slope_rects:
+                                print("Slope Left")
+                                entity_rect.bottom = rect.top
+                            else:
+                                entity_rect.left = rect.right
+                                self.collisions['left'] = True
                         self.pos[0] = entity_rect.x
-    
+
             self.pos[1] += frame_movement[1]
             entity_rect = self.rect()
             oneway_rects = tilemap.oneway_rects_around(self.pos)
@@ -108,7 +117,7 @@ class PhysicsEntity:
             self.flip = False
         if movement[0] < 0:
             self.flip = True
-    
+
         self.velocity[1] = min(self.settings.max_gravity, self.velocity[1] + self.settings.y_velocity)
     
         if self.collisions['down'] or self.collisions['up']:
@@ -117,8 +126,9 @@ class PhysicsEntity:
         self.animations.update()
 
     def draw(self, offset=(0, 0)):
-        self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]) )
-
+        self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
+        # DEV Player Hit Box
+        pg.draw.rect(self.screen, (255, 0, 0), (self.pos[0] - offset[0], self.pos[1] - offset[1], self.rect().width, self.rect().height))
 
 class Player(PhysicsEntity):
     def __init__(self, game, pos, size):
@@ -193,8 +203,10 @@ class Player(PhysicsEntity):
 
         self.air_time += 1
         if self.collisions['down']:
+            print("Grounded")
             self.air_time = 0
             self.isJumping = False
+        
 
         if self.air_time > 4:
             self.set_action('jump')
