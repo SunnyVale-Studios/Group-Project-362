@@ -140,11 +140,17 @@ class Player(PhysicsEntity):
         self.sprint_end_pos = None
         #add a sound to notify the player when the sprint is ready
         self.sprint_sound = pg.mixer.Sound('./assets/Sound/sprint-ready.wav')
+        #add a screaming sound
+        self.jumpscare_sound = pg.mixer.Sound('./assets/Sound/jumpscare-scream-sound.wav')
+        #add a jumpscare image
+        self.jumpscare_image = pg.image.load('./assets/Boss/jumpscare.jpg')
         #temp set the volume of the sound to 50%
         self.sprint_sound.set_volume(0.5)
         #a flag make sure the sound only play once
         self.sprint_sound_played = False
         self.on_ladder = False
+        self.jumpscare_timer = None
+        self.jumpscare_sound_played = False
 
 
     def update(self, tilemap, movement=(0, 0)):
@@ -213,7 +219,7 @@ class Player(PhysicsEntity):
             self.set_action('run')
         else:
             self.set_action('idle')
-        
+              
     def update_ladder(self, vertical_movement):
         if self.on_ladder:
             # Player is on a climbable tile, allow vertical movement
@@ -227,6 +233,114 @@ class Player(PhysicsEntity):
 
     def rect(self, offset=(0, 0)):
         return super().rect(offset)
+    
+    def check_collision_with_boss(self, boss):
+        #Check if the player collide with the boss
+        if self.rect().colliderect(boss.rect()):
+            # The player has collided with the boss
+            # Display the jumpscare image
+            self.screen.blit(self.jumpscare_image, (0, 0))
+            #Play a scream sound once
+            if not self.jumpscare_sound_played:
+                self.jumpscare_sound.play()
+                self.jumpscare_sound_played = True
+
+            # Start a timer to hide the jumpscare image after a certain amount of time
+            if not self.jumpscare_timer:
+                self.jumpscare_timer = pg.time.get_ticks() + self.settings.jumpscare_duration
+
+        # If the jumpscare timer is running
+        if self.jumpscare_timer:
+            # If the jumpscare duration has passed
+            if pg.time.get_ticks() > self.jumpscare_timer:
+                # Stop the timer
+                self.jumpscare_timer = None
+                # Hide the jumpscare image
+                self.jumpscare_image.set_alpha(0)
+                
+                
+        return self.rect().colliderect(boss.rect())
+
+class Boss(PhysicsEntity):
+    def __init__(self, game, player, pos, size):
+        super().__init__(game, 'boss', pos, size)
+        self.player = player
+        self.boost_end_time = 0
+        self.cooldown_end_time = 0
+        self.is_boosted = False
+        self.chase_sound = pg.mixer.Sound('./assets/Sound/boss-roar-sound.wav')
+
+        # Animation list
+        self.boss_animations = {
+            "walk": Timer(self.load_boss_images("walk", self.size[1] // 16), "walk"),
+        }
+
+        self.current_animation = self.boss_animations["walk"]
+        self.flip = False
+        self.start_chasing_time = None
+
+    def load_boss_images(self, boss_animation_name, scale):
+        # Define base path for boss imgs
+        Base_Boss_Path = "assets/Boss/Walk/"
+        # Load all images for the boss
+        temp_list = []
+        # Count number of files in the folder
+        boss_num_of_frames = 16  # There are 16 frames for the boss animation
+        for i in range(boss_num_of_frames):
+            # Load boss img
+            boss_img = pg.image.load(
+                Base_Boss_Path
+                + f"boss-{boss_animation_name}-{str(i).zfill(2)}-1.3.png"
+            ).convert_alpha()
+            # Scale boss img if needed
+            boss_img = pg.transform.scale(
+                boss_img, (int(boss_img.get_width() * scale), int(boss_img.get_height() * scale))
+            )
+            temp_list.append(boss_img)
+        return temp_list
+    
+    def update(self):
+        # Start chasing when the first book is collected
+        if self.start_chasing_time is None and self.game.book_manager.total_collected_books > 0:
+            self.start_chasing_time = pg.time.get_ticks()
+            self.chase_sound.play()
+
+        if self.start_chasing_time is not None and pg.time.get_ticks() >= self.start_chasing_time:
+            direction = pg.Vector2(self.player.pos) - pg.Vector2(self.pos)
+            distance = direction.length()
+            speed = self.settings.boss_speed
+            current_time = pg.time.get_ticks()
+            
+            if distance > 0:
+                direction = direction.normalize()
+            
+            #Boss boost if distance exceeds 400 and cooldown is over
+            if distance > 600 and current_time > self.cooldown_end_time and not self.is_boosted:
+                self.boost_end_time = current_time + self.settings.boost_duration
+                self.is_boosted = True
+            #After boosting, enter cooldown
+            if self.is_boosted and current_time > self.boost_end_time:
+                self.cooldown_end_time = current_time + self.settings.boost_cooldown
+                self.is_boosted = False
+            #If boosting, increase speed
+            #TODO: add sound effect when boss start boosting
+            if self.is_boosted:
+                speed += self.settings.boss_speed_boost
+            #Speed return to normal is distance less than 100
+            if distance < 100:
+                speed = self.settings.boss_speed
+                
+            #Update boss's position
+            self.pos[0] += direction.x * speed
+            self.pos[1] += direction.y * speed
+            
+            #Flip the boss's imgs depends on the player's position
+            self.flip = self.player.pos[0] < self.pos[0]
+            
+            print(f"Current distance to player: {distance}")
+            print(f"Current speed: {speed}")
+            
+        self.update_animation()
 
 if __name__ == "__main__":
     print("Incorrect file ran! Run python3 game.py")

@@ -6,7 +6,7 @@ from pygame.locals import *
 from pytmx import load_pygame
 
 from scripts.settings import Settings
-from scripts.entities import Player
+from scripts.entities import Player, Boss
 from scripts.tilemap import Tilemap
 from scripts.books import BookManager
 
@@ -17,6 +17,7 @@ class Game:
     def __init__(self):
         # Start pygame and default settings
         pg.init()
+        pg.mixer.init()
         self.settings = Settings()
         self.clock = pg.time.Clock()
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height), 0, 32)
@@ -42,6 +43,12 @@ class Game:
         self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (16, 32))
         self.tilemap = Tilemap(self, self.tmx_data.layers[2], self.tmx_data.layers[1], self.tmx_data.layers[3], tile_size=16)
 
+        # 8 is the amount of books we want spawned
+        self.book_manager = BookManager(8)
+        
+        #Create the boss
+        self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (8, 16))
+        
         # Player Movement Bools
         self.moving_left = False
         self.moving_right = False
@@ -53,8 +60,7 @@ class Game:
         # END DEV
 
         self.offset = [0, 0]
-        # 8 is the amount of books we want spawned
-        self.book_manager = BookManager(8)
+        
 
 
     def check_events(self):
@@ -87,6 +93,10 @@ class Game:
                 if key == K_DOWN and self.player.on_ladder:
                     self.movement[3] = True
 
+                
+                #Reset the game when pressing r key while player is dead
+                if key == K_r and not self.player.isAlive:
+                    self.reset()
                 if key == K_q:
                     pg.quit()
                     sys.exit()
@@ -115,6 +125,11 @@ class Game:
             self.update_entities()
             self.draw_entities()
             self.render_text()
+            
+            #TODO: Game-ending condition 1 - player dead
+            if self.player.check_collision_with_boss(self.boss):
+                print("Player collided with the boss!")
+                self.player.isAlive = False
 
             pg.display.update()
             self.clock.tick(self.settings.fps)
@@ -136,6 +151,9 @@ class Game:
         
             # Update boss and other items here
             # TODO
+            self.boss.update_animation()
+            self.boss.update()
+            
 
     # display the map to the screen
     def display_map(self, tmx_data, world_offset):
@@ -198,6 +216,9 @@ class Game:
 
         self.display_foreground(self.tmx_data, render_offset)
 
+        
+        self.boss.draw(render_offset)
+    
     #Display a text on the topright corner
     def render_text(self):
         # Check if cooldown is over
@@ -220,10 +241,18 @@ class Game:
         books_text_rect = books_text.get_rect(topright=(self.settings.screen_width - 20, 50))
         self.screen.blit(books_text, books_text_rect)
     
-    def reset_game(self):
-        # should reset books
-        # if needed, otherwise delete later
-       self.book_manager.reset()
+   
+        
+    #Game reset
+    def reset(self):
+        #reset the player
+        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (8, 16))
+        self.player.isAlive = True
+        #reset the boss
+        self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (8, 16))
+        #TODO:reset other game condition
+        self.book_manager.reset()
+
 
 if __name__ == "__main__":
     """Call py game.py to initiate and run the game"""
