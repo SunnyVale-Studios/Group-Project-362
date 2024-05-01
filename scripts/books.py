@@ -40,6 +40,7 @@ class BookManager:
         self.books.empty()
         self.total_collected_books = 0
         books_to_spawn = 8
+        self.collected_books = [False] * len(self.book_coords)
         book_coords = random.sample(BOOK_COORDS_LIST, books_to_spawn)
         for coords in book_coords:
             self.books.add(Book(coords))

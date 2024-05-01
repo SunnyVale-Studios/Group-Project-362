@@ -130,11 +130,17 @@ class Player(PhysicsEntity):
         self.sprint_end_pos = None
         #add a sound to notify the player when the sprint is ready
         self.sprint_sound = pg.mixer.Sound('./assets/Sound/sprint-ready.wav')
+        #add a screaming sound
+        self.jumpscare_sound = pg.mixer.Sound('./assets/Sound/jumpscare-scream-sound.wav')
+        #add a jumpscare image
+        self.jumpscare_image = pg.image.load('./assets/Boss/jumpscare.jpg')
         #temp set the volume of the sound to 50%
         self.sprint_sound.set_volume(0.5)
         #a flag make sure the sound only play once
         self.sprint_sound_played = False
         self.on_ladder = False
+        self.jumpscare_timer = None
+        self.jumpscare_sound_played = False
 
 
     def update(self, tilemap, movement=(0, 0)):
@@ -202,7 +208,7 @@ class Player(PhysicsEntity):
             self.set_action('run')
         else:
             self.set_action('idle')
-        
+              
     def update_ladder(self, vertical_movement):
         if self.on_ladder:
             # Player is on a climbable tile, allow vertical movement
@@ -218,6 +224,30 @@ class Player(PhysicsEntity):
         return super().rect(offset)
     
     def check_collision_with_boss(self, boss):
+        #Check if the player collide with the boss
+        if self.rect().colliderect(boss.rect()):
+            # The player has collided with the boss
+            # Display the jumpscare image
+            self.screen.blit(self.jumpscare_image, (0, 0))
+            #Play a scream sound once
+            if not self.jumpscare_sound_played:
+                self.jumpscare_sound.play()
+                self.jumpscare_sound_played = True
+
+            # Start a timer to hide the jumpscare image after a certain amount of time
+            if not self.jumpscare_timer:
+                self.jumpscare_timer = pg.time.get_ticks() + self.settings.jumpscare_duration
+
+        # If the jumpscare timer is running
+        if self.jumpscare_timer:
+            # If the jumpscare duration has passed
+            if pg.time.get_ticks() > self.jumpscare_timer:
+                # Stop the timer
+                self.jumpscare_timer = None
+                # Hide the jumpscare image
+                self.jumpscare_image.set_alpha(0)
+                
+                
         return self.rect().colliderect(boss.rect())
 
 class Boss(PhysicsEntity):
@@ -227,6 +257,7 @@ class Boss(PhysicsEntity):
         self.boost_end_time = 0
         self.cooldown_end_time = 0
         self.is_boosted = False
+        self.chase_sound = pg.mixer.Sound('./assets/Sound/boss-roar-sound.wav')
 
         # Animation list
         self.boss_animations = {
@@ -235,7 +266,7 @@ class Boss(PhysicsEntity):
 
         self.current_animation = self.boss_animations["walk"]
         self.flip = False
-        self.start_chasing_time = pg.time.get_ticks() + 5000
+        self.start_chasing_time = None
 
     def load_boss_images(self, boss_animation_name, scale):
         # Define base path for boss imgs
@@ -258,7 +289,12 @@ class Boss(PhysicsEntity):
         return temp_list
     
     def update(self):
-        if pg.time.get_ticks() >= self.start_chasing_time:
+        # Start chasing when the first book is collected
+        if self.start_chasing_time is None and self.game.book_manager.total_collected_books > 0:
+            self.start_chasing_time = pg.time.get_ticks()
+            self.chase_sound.play()
+
+        if self.start_chasing_time is not None and pg.time.get_ticks() >= self.start_chasing_time:
             direction = pg.Vector2(self.player.pos) - pg.Vector2(self.pos)
             distance = direction.length()
             speed = self.settings.boss_speed
@@ -268,7 +304,7 @@ class Boss(PhysicsEntity):
                 direction = direction.normalize()
             
             #Boss boost if distance exceeds 400 and cooldown is over
-            if distance > 400 and current_time > self.cooldown_end_time and not self.is_boosted:
+            if distance > 600 and current_time > self.cooldown_end_time and not self.is_boosted:
                 self.boost_end_time = current_time + self.settings.boost_duration
                 self.is_boosted = True
             #After boosting, enter cooldown

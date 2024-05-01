@@ -17,6 +17,7 @@ class Game:
     def __init__(self):
         # Start pygame and default settings
         pg.init()
+        pg.mixer.init()
         self.settings = Settings()
         self.clock = pg.time.Clock()
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height), 0, 32)
@@ -42,6 +43,9 @@ class Game:
         self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (16, 16))
         self.tilemap = Tilemap(self, self.tmx_data.layers[2], self.tmx_data.layers[1], self.tmx_data.layers[3], tile_size=16)
 
+        # 8 is the amount of books we want spawned
+        self.book_manager = BookManager(8)
+        
         #Create the boss
         self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (8, 16))
         
@@ -56,8 +60,7 @@ class Game:
         # END DEV
 
         self.offset = [0, 0]
-        # 8 is the amount of books we want spawned
-        self.book_manager = BookManager(8)
+        
 
 
     def check_events(self):
@@ -236,10 +239,7 @@ class Game:
         books_text_rect = books_text.get_rect(topright=(self.settings.screen_width - 20, 50))
         self.screen.blit(books_text, books_text_rect)
     
-    def reset_game(self):
-        # should reset books
-        # if needed, otherwise delete later
-       self.book_manager.reset()
+   
         
     #Game reset
     def reset(self):
@@ -249,6 +249,7 @@ class Game:
         #reset the boss
         self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (8, 16))
         #TODO:reset other game condition
+        self.book_manager.reset()
 
 
 if __name__ == "__main__":
