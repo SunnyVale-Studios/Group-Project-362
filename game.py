@@ -9,6 +9,7 @@ from scripts.settings import Settings
 from scripts.entities import Player, Boss
 from scripts.tilemap import Tilemap
 from scripts.books import BookManager
+from scripts.menu import Menu
 
 # Use later
 vec = pg.math.Vector2  # 2 dimensional
@@ -45,6 +46,7 @@ class Game:
 
         # 8 is the amount of books we want spawned
         self.book_manager = BookManager(8)
+        self.menu = Menu(self)
         
         #Create the boss
         self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (20, 32))
@@ -125,12 +127,15 @@ class Game:
             self.update_entities()
             self.draw_entities()
             self.render_text()
+            # Change later have a independet location outisde of the game
+            self.menu.update()
             
             #TODO: Game-ending condition 1 - player dead
             if self.player.check_collision_with_boss(self.boss):
                 print("Player collided with the boss!")
                 self.player.isAlive = False
 
+            
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
@@ -206,7 +211,7 @@ class Game:
         self.display_map(self.tmx_data, render_offset)
         
         # DEV MODE enable map collision mode
-        self.tilemap.draw(self.screen, render_offset)
+        # self.tilemap.draw(self.screen, render_offset)
         # Display books on screen
         player_rect = self.player.rect()
         self.book_manager.update(player_rect)
@@ -216,7 +221,6 @@ class Game:
 
         self.display_foreground(self.tmx_data, render_offset)
 
-        
         self.boss.draw(render_offset)
     
     #Display a text on the topright corner
@@ -246,10 +250,10 @@ class Game:
     #Game reset
     def reset(self):
         #reset the player
-        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (8, 16))
+        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (16, 32))
         self.player.isAlive = True
         #reset the boss
-        self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (8, 16))
+        self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (20, 32))
         #TODO:reset other game condition
         self.book_manager.reset()
 
