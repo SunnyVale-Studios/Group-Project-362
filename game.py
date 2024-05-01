@@ -47,7 +47,7 @@ class Game:
         self.book_manager = BookManager(8)
         
         #Create the boss
-        self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (8, 16))
+        self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (20, 32))
         
         # Player Movement Bools
         self.moving_left = False
@@ -206,7 +206,7 @@ class Game:
         self.display_map(self.tmx_data, render_offset)
         
         # DEV MODE enable map collision mode
-        # self.tilemap.draw(self.screen, render_offset)
+        self.tilemap.draw(self.screen, render_offset)
         # Display books on screen
         player_rect = self.player.rect()
         self.book_manager.update(player_rect)
