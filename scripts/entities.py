@@ -128,7 +128,7 @@ class PhysicsEntity:
     def draw(self, offset=(0, 0)):
         self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
         # DEV Player Hit Box
-        pg.draw.rect(self.screen, (255, 0, 0), (self.pos[0] - offset[0], self.pos[1] - offset[1], self.rect().width, self.rect().height))
+        # pg.draw.rect(self.screen, (255, 0, 0), (self.pos[0] - offset[0], self.pos[1] - offset[1], self.rect().width, self.rect().height))
 
 class Player(PhysicsEntity):
     def __init__(self, game, pos, size):

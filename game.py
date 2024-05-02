@@ -61,6 +61,9 @@ class Game:
         self.down = False
         # END DEV
 
+        self.started = False
+        self.paused = False
+
         self.offset = [0, 0]
         
 
@@ -94,7 +97,12 @@ class Game:
                     self.movement[2] = True
                 if key == K_DOWN and self.player.on_ladder:
                     self.movement[3] = True
-
+                
+                # Menu interaction
+                if key == K_ESCAPE and not self.started:
+                    self.started = True
+                if key == K_p and self.started:
+                    self.paused = not self.paused
                 
                 #Reset the game when pressing r key while player is dead
                 if key == K_r and not self.player.isAlive:
@@ -124,18 +132,21 @@ class Game:
     def play(self):
         while True:
             self.events_checker()
-            self.update_entities()
-            self.draw_entities()
-            self.render_text()
-            # Change later have a independet location outisde of the game
-            self.menu.update()
             
-            #TODO: Game-ending condition 1 - player dead
-            if self.player.check_collision_with_boss(self.boss):
-                print("Player collided with the boss!")
-                self.player.isAlive = False
 
+            if self.started and not self.paused:
+                self.events_checker()
+                self.update_entities()
+                self.draw_entities()
+                self.render_text()
+                # Change later have a independet location outisde of the game
+                
+                #TODO: Game-ending condition 1 - player dead
+                if self.player.check_collision_with_boss(self.boss):
+                    print("Player collided with the boss!")
+                    self.player.isAlive = False
             
+            self.menu.update()
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
