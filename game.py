@@ -98,18 +98,12 @@ class Game:
                 if key == K_DOWN and self.player.on_ladder:
                     self.movement[3] = True
                 
-                # Menu interaction
-                if key == K_ESCAPE and not self.started:
-                    self.started = True
-                if key == K_p and self.started:
+                if key == K_ESCAPE and self.started:
                     self.paused = not self.paused
                 
                 #Reset the game when pressing r key while player is dead
                 if key == K_r and not self.player.isAlive:
                     self.reset()
-                if key == K_q:
-                    pg.quit()
-                    sys.exit()
             # Keyup Press
             if event.type == KEYUP:
                 key = event.key
