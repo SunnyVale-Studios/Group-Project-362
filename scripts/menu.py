@@ -8,26 +8,29 @@ import sys
 class Menu:
     def __init__(self, game):
         self.font = pg.font.SysFont(None, 48)
+        self.title = pg.font.SysFont(None, 72)
         self.text_color = (0, 0, 0)
         self.game = game
         self.screen = game.screen
         self.screen_rect = self.screen.get_rect()
 
         self.main_menu_buttons = [
-            Button(self, 0, (self.screen_rect.centerx - 200, self.screen_rect.top + 30), (400, 100)),
-            Button(self, 1, (self.screen_rect.centerx - 150, self.screen_rect.centery - 200), (300, 100)),
-            Button(self, 2, (self.screen_rect.centerx - 150, self.screen_rect.centery - 50), (300, 100)),
-            Button(self, 3, (self.screen_rect.centerx - 150, self.screen_rect.centery + 100), (300, 100)),
+            Button(self, 0, (self.screen_rect.centerx - 200, self.screen_rect.top + 40), (400, 100)),
+            Button(self, 1, (self.screen_rect.centerx - 100, self.screen_rect.centery - 200), (200, 75)),
+            Button(self, 2, (self.screen_rect.centerx - 100, self.screen_rect.centery - 50), (200, 75)),
+            Button(self, 3, (self.screen_rect.centerx - 100, self.screen_rect.centery + 100), (200, 75)),
             Button(self, 4, (self.screen_rect.right - 240, self.screen_rect.bottom - 120), (100, 100)),
             Button(self, 5, (self.screen_rect.right - 120, self.screen_rect.bottom - 120), (100, 100))
         ]
 
         self.reset_menu_buttons = [
-            Button(self, 6, (self.screen_rect.centerx - 150, self.screen_rect.centery - 50), (300, 100))
+            Button(self, 6, (self.screen_rect.centerx - 100, self.screen_rect.centery - 50), (200, 75)),
+            Button(self, 3, (self.screen_rect.centerx - 100, self.screen_rect.centery + 100), (200, 75))
         ]
 
         self.pause_menu_buttons = [
-            Button(self, 3, (self.screen_rect.centerx - 150, self.screen_rect.centery - 50), (300, 100)),
+            Button(self, 6, (self.screen_rect.centerx - 100, self.screen_rect.centery - 50), (200, 75)),
+            Button(self, 3, (self.screen_rect.centerx - 100, self.screen_rect.centery + 100), (200, 75)),
             Button(self, 5, (self.screen_rect.right - 120, self.screen_rect.bottom - 120), (100, 100))
         ]
 
@@ -38,7 +41,7 @@ class Menu:
         if not self.game.started:
             for button in self.main_menu_buttons:
                 button.update(mouse, clicked)
-        elif not self.game.player.isAlive:
+        elif not self.game.player.isAlive and self.game.player.jumpscare_image.get_alpha() == 0:
             for button in self.reset_menu_buttons:
                 button.update(mouse, clicked)
         elif self.game.paused:
@@ -49,7 +52,7 @@ class Menu:
 ### Create buttons with generic functions
 class Button:
     buttons = {
-        0:["game_title", "The LOST Pages"],
+        0:["game_title", "The Lost Pages"],
         1:["start_button", "Start"],
         2:["settings_button", "Settings"],
         3:["exit_button", "Quit"],
@@ -62,7 +65,10 @@ class Button:
         self.button = button
         self.rect = pg.Rect(pos, size)
         self.selected = False
-        self.text = menu.font.render(Button.buttons[button][1], True, menu.text_color)
+        if button == 0:
+            self.text = menu.title.render(Button.buttons[button][1], True, (255, 255, 255))
+        else:
+            self.text = menu.font.render(Button.buttons[button][1], True, menu.text_color)
         self.text_rect = self.text.get_rect()
         self.text_rect.center = self.rect.center
         
@@ -96,7 +102,7 @@ class Button:
     def update(self, mouse_pos, isClicked):
         # TODO - Check for interaction with the button only when visible
         if not self.selected and self.rect.collidepoint(mouse_pos):
-            self.selected = True if self.button != 0 else False
+            self.selected = True
         if self.selected and not self.rect.collidepoint(mouse_pos):
             self.selected = False
         if isClicked:
@@ -106,5 +112,6 @@ class Button:
         self.draw()
 
     def draw(self):
-        pg.draw.rect(self.menu.screen, (255, 255, 255) if not self.selected else (200, 200, 200), self.rect)
+        if self.button != 0:
+            pg.draw.rect(self.menu.screen, (174, 120, 81) if not self.selected else (223, 159, 94), self.rect)
         self.menu.screen.blit(self.text, self.text_rect)
