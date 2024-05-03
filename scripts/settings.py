@@ -11,7 +11,7 @@ class Settings:
         self.sprint_distance = 80 #change sprint distance
         self.sprint_speed = 3 #sprinting spped
         self.sprint_cooldown = 3000 #sprint cooldown - 3 seconds
-        self.climb_speed = 3
+        self.climb_speed = 5
         self.boss_speed = 3 
         self.boss_speed_boost = 2 #boss additional boosting speed
         self.boost_duration = 2000 #boss boost duration is 3 seconds
