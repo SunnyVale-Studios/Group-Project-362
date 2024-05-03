@@ -4,10 +4,6 @@ from scripts.utils import load_images
 
 class PhysicsEntity:
     def __init__(self, game, type, pos, size):
-        '''DEVELOPMENT VARIABLES ONLY DONT KEEP IN FINAL ITERATION'''
-
-        self.creativeMode = False
-        '''END OF DEV'''
         self.game = game
         self.screen = game.screen
         self.settings = game.settings
@@ -55,63 +51,54 @@ class PhysicsEntity:
     def update(self, tilemap, movement=(0, 0)):
         self.collisions = {'up': False, 'down': False, 'right': False, 'left': False}
     
-        if self.creativeMode:
-            # This will ignore velocity and just input straight direction movement to fly around map
-            # had to add this change as adding one way change broke the logic for some reason
-            frame_movement = (movement[0] * 10, movement[1] * 10)
-            self.pos[0] += frame_movement[0]
-            self.pos[1] += frame_movement[1]
+        # In-game movement physics
+        if movement[0] != 0:
+            # Constant velocity when user inputs movement
+            self.velocity[0] = movement[0] * self.settings.x_velocity
+
+        if self.isJumping:
+            # We want to make sure while in the air the velocity of the player is only dependent on the last velocity he was in and not the movement
+            self.velocity[0] = movement[0] * 2 * self.settings.x_velocity
         else:
-            # In-game movement physics
-            if movement[0] != 0:
-                # Constant velocity when user inputs movement
-                self.velocity[0] = movement[0] * self.settings.x_velocity
-    
-            if self.isJumping:
-                # We want to make sure while in the air the velocity of the player is only dependent on the last velocity he was in and not the movement
-                self.velocity[0] = movement[0] * 2 * self.settings.x_velocity
-            else:
-                self.velocity[0] = self.velocity[0] - self.settings.friction if self.velocity[0] > 1 else self.velocity[0] + self.settings.friction if self.velocity[0] < -1 else 0
-                self.last_velocity[0] = self.velocity[0]
-    
-            frame_movement = (self.velocity[0], self.velocity[1])
+            self.velocity[0] = self.velocity[0] - self.settings.friction if self.velocity[0] > 1 else self.velocity[0] + self.settings.friction if self.velocity[0] < -1 else 0
+            self.last_velocity[0] = self.velocity[0]
 
-            self.pos[0] += frame_movement[0]
-            entity_rect = self.rect()
-            oneway_rects = tilemap.oneway_rects_around(self.pos)
-            slope_rects = tilemap.slope_rects_around(self.pos) if not self.isJumping else []
-            for rect in tilemap.physics_rects_around(self.pos):
-                if entity_rect.colliderect(rect):
-                    if rect not in oneway_rects:
-                        if frame_movement[0] > 0:
-                            if rect in slope_rects:
-                                print("Slope Right")
-                                entity_rect.bottom = rect.top
-                            else:
-                                entity_rect.right = rect.left
-                                self.collisions['right'] = True
-                        if frame_movement[0] < 0:
-                            if rect in slope_rects:
-                                print("Slope Left")
-                                entity_rect.bottom = rect.top
-                            else:
-                                entity_rect.left = rect.right
-                                self.collisions['left'] = True
-                        self.pos[0] = entity_rect.x
+        frame_movement = (self.velocity[0], self.velocity[1])
 
-            self.pos[1] += frame_movement[1]
-            entity_rect = self.rect()
-            oneway_rects = tilemap.oneway_rects_around(self.pos)
-            for rect in tilemap.physics_rects_around(self.pos):
-                if entity_rect.colliderect(rect):
-                    if rect not in oneway_rects or self.velocity[1] >= 0:
-                        if frame_movement[1] > 0:
+        self.pos[0] += frame_movement[0]
+        entity_rect = self.rect()
+        oneway_rects = tilemap.oneway_rects_around(self.pos)
+        slope_rects = tilemap.slope_rects_around(self.pos) if not self.isJumping else []
+        for rect in tilemap.physics_rects_around(self.pos):
+            if entity_rect.colliderect(rect):
+                if rect not in oneway_rects:
+                    if frame_movement[0] > 0:
+                        if rect in slope_rects:
                             entity_rect.bottom = rect.top
-                            self.collisions['down'] = True
-                        if frame_movement[1] < 0:
-                            entity_rect.top = rect.bottom
-                            self.collisions['up'] = True
-                        self.pos[1] = entity_rect.y
+                        else:
+                            entity_rect.right = rect.left
+                            self.collisions['right'] = True
+                    if frame_movement[0] < 0:
+                        if rect in slope_rects:
+                            entity_rect.bottom = rect.top
+                        else:
+                            entity_rect.left = rect.right
+                            self.collisions['left'] = True
+                    self.pos[0] = entity_rect.x
+
+        self.pos[1] += frame_movement[1]
+        entity_rect = self.rect()
+        oneway_rects = tilemap.oneway_rects_around(self.pos)
+        for rect in tilemap.physics_rects_around(self.pos):
+            if entity_rect.colliderect(rect):
+                if rect not in oneway_rects or self.velocity[1] >= 0:
+                    if frame_movement[1] > 0:
+                        entity_rect.bottom = rect.top
+                        self.collisions['down'] = True
+                    if frame_movement[1] < 0:
+                        entity_rect.top = rect.bottom
+                        self.collisions['up'] = True
+                    self.pos[1] = entity_rect.y
     
         if movement[0] > 0:
             self.flip = False
@@ -337,8 +324,9 @@ class Boss(PhysicsEntity):
             #Flip the boss's imgs depends on the player's position
             self.flip = self.player.pos[0] < self.pos[0]
             
-            print(f"Current distance to player: {distance}")
-            print(f"Current speed: {speed}")
+            # CHECK FOR BOSS SPEED AND POSITION
+            #print(f"Current distance to player: {distance}")
+            #print(f"Current speed: {speed}")
             
         self.update_animation()
 
