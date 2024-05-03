@@ -41,25 +41,24 @@ class Game:
         # Pass the game instance to the Player class
         # self.player = Player(self, 0, self.settings.screen_height - 19, 1)
         # OLD self.player = Player(self, 0, self.screen.get_size()[1] - 19, 1.25)
-        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (16, 32))
+        # Create the player
+        self.player = Player(self, (2000, self.screen.get_size()[1] + 16), (16, 32))
+        
+        #Create the boss
+        self.boss = Boss(self, self.player, (336, self.screen.get_size()[1] - 19), (20, 32))
+        
         self.tilemap = Tilemap(self, self.tmx_data.layers[2], self.tmx_data.layers[1], self.tmx_data.layers[3], tile_size=16)
 
         # 8 is the amount of books we want spawned
         self.book_manager = BookManager(8)
         self.menu = Menu(self)
         
-        #Create the boss
-        self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (20, 32))
         
         # Player Movement Bools
         self.moving_left = False
         self.moving_right = False
         # left, right, up, down
         self.movement = [False, False, False, False]
-        # TEMP DEV
-        self.up = False
-        self.down = False
-        # END DEV
 
         self.started = False
         self.paused = False
@@ -77,33 +76,25 @@ class Game:
             # Keydown Press
             if event.type == KEYDOWN:
                 key = event.key
-                if key == K_d or key == K_RIGHT:
+                # SPACE FOR GOING UP LADDERS AND JUMPING
+                if key == K_d:
                     self.movement[1] = True
-                if key == K_a or key == K_LEFT:
+                if key == K_a:
                     self.movement[0] = True
-                if key == K_SPACE and not self.player.isJumping:
-                    self.player.velocity.y = -self.settings.jump_velocity
-                    self.player.isJumping = True #new
-                # REMOVE AFTER DEV
-                if key == K_c: # Creative Mode to fly around
-                    self.player.creativeMode = not self.player.creativeMode
-                if key == K_w and self.player.creativeMode:
-                    self.up = True
-                if key == K_s and self.player.creativeMode:
-                    self.down = True
-                # END REMOVE
 
-                if key == K_UP and self.player.on_ladder:
-                    self.movement[2] = True
-                if key == K_DOWN and self.player.on_ladder:
+                if key == K_SPACE:
+                    if self.player.on_ladder:
+                        self.movement[2] = True
+                    elif not self.player.isJumping:
+                        self.player.velocity.y = -self.settings.jump_velocity
+                        self.player.isJumping = True #new
+                # USE THIS TO GO DOWN LADDERS
+                if key == K_s and self.player.on_ladder:
                     self.movement[3] = True
                 
                 if key == K_ESCAPE and self.started:
                     self.paused = not self.paused
                 
-                #Reset the game when pressing r key while player is dead
-                if key == K_r and not self.player.isAlive:
-                    self.reset()
             # Keyup Press
             if event.type == KEYUP:
                 key = event.key
@@ -111,27 +102,22 @@ class Game:
                     self.movement[1] = False
                 if key == K_a or key == K_LEFT:
                     self.movement[0] = False
-
-                if key == K_UP:
+                
+                # Remove going down ladders
+                if key == K_SPACE:
                     self.movement[2] = False
-                if key == K_DOWN:
-                    self.movement[3] = False
-
-                # REMOVE AFTER DEV
-                if key == K_w:
-                    self.up = False
                 if key == K_s:
-                    self.down = False
+                    self.movement[3] = False
 
     def play(self):
         while True:
             self.events_checker()
+            self.draw_entities()
             
 
             if self.started and not self.paused:
                 self.events_checker()
                 self.update_entities()
-                self.draw_entities()
                 self.render_text()
                 # Change later have a independet location outisde of the game
                 
@@ -153,7 +139,7 @@ class Game:
         if self.player.isAlive:
             # Update the animation
             self.player.update_animation()
-            self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]), (self.down - self.up))) # self.up - self.down is just for flying around the map
+            self.player.update(self.tilemap, ((self.movement[1] - self.movement[0]), 0)) # self.up - self.down is just for flying around the map
 
             if self.player.on_ladder:
                 self.player.update_ladder(self.movement[3] - self.movement[2])  # Update ladder movement separately
@@ -255,10 +241,11 @@ class Game:
     #Game reset
     def reset(self):
         #reset the player
-        self.player = Player(self, (2000, self.screen.get_size()[1] - 19), (16, 32))
+        self.player = Player(self, (2000, self.screen.get_size()[1] + 16), (16, 32))
         self.player.isAlive = True
+        self.paused = False
         #reset the boss
-        self.boss = Boss(self, self.player, (self.player.pos[0] - 100, self.screen.get_size()[1] - 19), (20, 32))
+        self.boss = Boss(self, self.player, (336, self.screen.get_size()[1] - 19), (20, 32))
         #TODO:reset other game condition
         self.book_manager.reset()
 
