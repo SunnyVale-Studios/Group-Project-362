@@ -56,7 +56,10 @@ class Game:
         # Player Movement Bools
         # left, right, up, down
         self.movement = [False, False, False, False]
-        self.clicked = False
+        # wasClicked for mouse state in previous frame
+        self.isClicked = False
+        # isClicked for mouse state in current frame
+        self.wasClicked = False
 
         self.started = False
         self.paused = False
@@ -64,6 +67,7 @@ class Game:
         self.offset = [0, 0]
         
     def check_events(self):
+        self.wasClicked = self.isClicked
         for event in pg.event.get():
             # Quit Condition
             if event.type == QUIT:
@@ -72,10 +76,10 @@ class Game:
             # Keydown Press
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == BUTTON_LEFT:
-                    self.clicked = True
+                    self.isClicked = True
             if event.type == MOUSEBUTTONUP:
                 if event.button == BUTTON_LEFT:
-                    self.clicked = False
+                    self.isClicked = False
             if event.type == KEYDOWN:
                 key = event.key
                 if key == K_d:
@@ -127,7 +131,7 @@ class Game:
                     print("Player collided with the boss!")
                     self.player.isAlive = False
             
-            self.menu.update(self.clicked)
+            self.menu.update(self.wasClicked, self.isClicked)
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
