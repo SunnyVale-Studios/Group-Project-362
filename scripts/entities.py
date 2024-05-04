@@ -143,6 +143,7 @@ class Player(PhysicsEntity):
     def update(self, tilemap, movement=(0, 0)):
         # Check if sprint key is pressed and cooldown is over
         keys = pg.key.get_pressed()
+        self.sprint_sound.set_volume(0 if self.game.menu.muted else 0.5)
         # Sprint active when cooldown is over
         if keys[pg.K_LSHIFT] and pg.time.get_ticks() - self.last_sprint_time > self.settings.sprint_cooldown:
             self.is_sprinting = True
@@ -229,6 +230,7 @@ class Player(PhysicsEntity):
             self.screen.blit(self.jumpscare_image, (0, 0))
             #Play a scream sound once
             if not self.jumpscare_sound_played:
+                self.jumpscare_sound.set_volume(0 if self.game.menu.muted else 1)
                 self.jumpscare_sound.play()
                 self.jumpscare_sound_played = True
 
@@ -290,6 +292,7 @@ class Boss(PhysicsEntity):
         # Start chasing when the first book is collected
         if self.start_chasing_time is None and self.game.book_manager.total_collected_books > 0:
             self.start_chasing_time = pg.time.get_ticks()
+            self.chase_sound.set_volume(0 if self.game.menu.muted else 1)
             self.chase_sound.play()
 
         if self.start_chasing_time is not None and pg.time.get_ticks() >= self.start_chasing_time:

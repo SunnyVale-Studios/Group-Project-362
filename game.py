@@ -53,20 +53,16 @@ class Game:
         self.book_manager = BookManager(8)
         self.menu = Menu(self)
         
-        
         # Player Movement Bools
-        self.moving_left = False
-        self.moving_right = False
         # left, right, up, down
         self.movement = [False, False, False, False]
+        self.clicked = False
 
         self.started = False
         self.paused = False
 
         self.offset = [0, 0]
         
-
-
     def check_events(self):
         for event in pg.event.get():
             # Quit Condition
@@ -74,14 +70,20 @@ class Game:
                 pg.quit()
                 sys.exit()
             # Keydown Press
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == BUTTON_LEFT:
+                    self.clicked = True
+            if event.type == MOUSEBUTTONUP:
+                if event.button == BUTTON_LEFT:
+                    self.clicked = False
             if event.type == KEYDOWN:
                 key = event.key
-                # SPACE FOR GOING UP LADDERS AND JUMPING
                 if key == K_d:
                     self.movement[1] = True
                 if key == K_a:
                     self.movement[0] = True
 
+                # SPACE FOR GOING UP LADDERS AND JUMPING
                 if key == K_SPACE:
                     if self.player.on_ladder:
                         self.movement[2] = True
@@ -98,9 +100,9 @@ class Game:
             # Keyup Press
             if event.type == KEYUP:
                 key = event.key
-                if key == K_d or key == K_RIGHT:
+                if key == K_d:
                     self.movement[1] = False
-                if key == K_a or key == K_LEFT:
+                if key == K_a:
                     self.movement[0] = False
                 
                 # Remove going down ladders
@@ -113,7 +115,6 @@ class Game:
         while True:
             self.events_checker()
             self.draw_entities()
-            
 
             if self.started and not self.paused:
                 self.events_checker()
@@ -126,7 +127,7 @@ class Game:
                     print("Player collided with the boss!")
                     self.player.isAlive = False
             
-            self.menu.update()
+            self.menu.update(self.clicked)
             pg.display.update()
             self.clock.tick(self.settings.fps)
 
