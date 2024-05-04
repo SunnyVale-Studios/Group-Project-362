@@ -45,25 +45,25 @@ class Menu:
             Button (self, 8, (self.screen_rect.centerx - 300, self.screen_rect.centery - 200), (600, 350)),
             Button (self, 7, (self.screen_rect.centerx + 200, self.screen_rect.centery - 300), (100, 75))
         ]
-    def update(self, clicked):
+    def update(self, wasCLicked, isClicked):
         # Continoulsy check for user input on the buttons or
         mouse = pg.mouse.get_pos()
         if not self.game.started:
             if self.settingsOpen:
                 for button in self.settings_menu_buttons:
-                    button.update(mouse, clicked)
+                    button.update(mouse, wasCLicked, isClicked)
             elif self.infoOpen:
                 for button in self.info_page:
-                    button.update(mouse, clicked)
+                    button.update(mouse, wasCLicked, isClicked)
             else:
                 for button in self.main_menu_buttons:
-                    button.update(mouse, clicked)
+                    button.update(mouse, wasCLicked, isClicked)
         elif not self.game.player.isAlive and self.game.player.jumpscare_image.get_alpha() == 0:
             for button in self.reset_menu_buttons:
-                button.update(mouse, clicked)
+                button.update(mouse, wasCLicked, isClicked)
         elif self.game.paused:
             for button in self.pause_menu_buttons:
-                button.update(mouse, clicked)
+                button.update(mouse, wasCLicked, isClicked)
 
 ### Create buttons with generic functions
 class Button:
@@ -142,13 +142,13 @@ class Button:
             case 8:
                 pass
 
-    def update(self, mouse_pos, isClicked):
+    def update(self, mouse_pos, wasClicked, isClicked):
         # TODO - Check for interaction with the button only when visible
         if not self.selected and self.rect.collidepoint(mouse_pos):
             self.selected = True
         if self.selected and not self.rect.collidepoint(mouse_pos):
             self.selected = False
-        if isClicked:
+        if wasClicked and not isClicked:
             if self.rect.collidepoint(mouse_pos):
                 self.buttonPress()
         # Draw
