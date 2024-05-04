@@ -23,7 +23,8 @@ class Menu:
             Button(self, 1, (self.screen_rect.centerx - 100, self.screen_rect.centery - 200), (200, 75)),
             Button(self, 2, (self.screen_rect.centerx - 100, self.screen_rect.centery - 50), (200, 75)),
             Button(self, 3, (self.screen_rect.centerx - 100, self.screen_rect.centery + 100), (200, 75)),
-            Button(self, 4, (self.screen_rect.right - 120, self.screen_rect.bottom - 120), (100, 100))        ]
+            Button(self, 4, (self.screen_rect.right - 120, self.screen_rect.bottom - 120), (100, 100))
+        ]
 
         self.reset_menu_buttons = [
             Button(self, 6, (self.screen_rect.centerx - 100, self.screen_rect.centery - 50), (200, 75)),
@@ -41,7 +42,7 @@ class Menu:
         ]
 
         self.info_page = [
-            Button (self, 8, (self.screen_rect.centerx - 300, self.screen_rect.centery - 200), (600, 500)),
+            Button (self, 8, (self.screen_rect.centerx - 300, self.screen_rect.centery - 200), (600, 350)),
             Button (self, 7, (self.screen_rect.centerx + 200, self.screen_rect.centery - 300), (100, 75))
         ]
     def update(self, clicked):
@@ -67,7 +68,7 @@ class Menu:
 ### Create buttons with generic functions
 class Button:
     buttons = {
-        0:["game_title", "The Lost Pages"],
+        0:["game_title", "The Forgotten Pages"],
         1:["start_button", "Start"],
         2:["settings_button", "Settings"],
         3:["exit_button", "Quit"],
@@ -75,7 +76,12 @@ class Button:
         5:["audio_button", "Mute"],
         6:["reset_button", "Reset"],
         7:["exit_settings_button", "Back"],
-        8:["info_page", "Write here how to play the game"]
+        8:["info_page", [["Use SPACE and ASD to move.", -125], #Max 34 per line
+                         ["Collect books around the map", -75], 
+                         ["until you get all of them.", -25],
+                         ["But beware of the monster", 25],
+                         ["that lurks nearby you.", 75],
+                         ["Good luck!", 125]]]
     }
     def __init__(self, menu, button, pos, size):
         self.menu = menu
@@ -86,6 +92,14 @@ class Button:
             self.text = menu.title.render(Button.buttons[button][1], True, (255, 255, 255))
         elif button == 8:
             self.list_text = []
+            for text in Button.buttons[button][1]:
+                rendered_text = menu.font.render(text[0], True, (255, 255 ,255))
+                text_rect = rendered_text.get_rect()
+                text_rect.center = self.rect.center
+                text_rect.centery += text[1]
+                self.list_text.append([rendered_text, text_rect])
+            print(self.list_text)
+
         else:
             self.text = menu.font.render(Button.buttons[button][1], True, menu.text_color)
         if not button == 8:
@@ -113,6 +127,7 @@ class Button:
                 pass
             case 5:
                 self.menu.muted = not self.menu.muted
+                self.text = self.menu.font.render("Muted" if self.menu.muted else "Mute", True, self.menu.text_color)
                 pg.mixer_music.set_volume(0 if self.menu.muted else 1)
                 print(self.menu.muted)
                 # Change photo from audio to audio slashed(muted)
@@ -140,7 +155,7 @@ class Button:
         self.draw()
 
     def draw(self):
-        if self.button != 0:
+        if self.button != 0 and self.button != 8:
             pg.draw.rect(self.menu.screen, (174, 120, 81) if not self.selected else (223, 159, 94), self.rect)
         if self.button == 8:
             for text in self.list_text:
