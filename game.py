@@ -10,8 +10,9 @@ from scripts.entities import Player, Boss
 from scripts.tilemap import Tilemap
 from scripts.books import BookManager
 from scripts.menu import Menu
+from scripts.end_game import EndGame
 
-# Use later
+# Use laterd
 vec = pg.math.Vector2  # 2 dimensional
 
 class Game:
@@ -22,6 +23,7 @@ class Game:
         self.settings = Settings()
         self.clock = pg.time.Clock()
         self.screen = pg.display.set_mode((self.settings.screen_width, self.settings.screen_height), 0, 32)
+        self.end_game = EndGame(self)
         pg.display.set_caption("The Forgotten Pages")
 
         # load map
@@ -63,6 +65,9 @@ class Game:
 
         self.started = False
         self.paused = False
+        
+        self.start_time = None
+        self.end_time = None
 
         self.offset = [0, 0]
         
@@ -121,6 +126,9 @@ class Game:
             self.draw_entities()
 
             if self.started and not self.paused:
+                # Record the start time when the game starts
+                if self.start_time is None:
+                    self.start_time = pg.time.get_ticks()
                 self.events_checker()
                 self.update_entities()
                 self.render_text()
@@ -128,8 +136,14 @@ class Game:
                 
                 #TODO: Game-ending condition 1 - player dead
                 if self.player.check_collision_with_boss(self.boss):
-                    print("Player collided with the boss!")
                     self.player.isAlive = False
+                
+                # Check if all books are collected
+                if self.book_manager.all_books_collected():
+                    # Record the end time when all books are collected
+                    if self.end_time is None:
+                        self.end_time = pg.time.get_ticks()
+                    self.end_game.display_end_game_text()
             
             self.menu.update(self.wasClicked, self.isClicked)
             pg.display.update()

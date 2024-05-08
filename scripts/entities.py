@@ -113,7 +113,8 @@ class PhysicsEntity:
         self.animations.update()
 
     def draw(self, offset=(0, 0)):
-        self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
+        if self.isAlive:
+            self.screen.blit(pg.transform.flip(self.current_animation.image(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1] + self.anim_offset[1]))
         # DEV Player Hit Box
         # pg.draw.rect(self.screen, (255, 0, 0), (self.pos[0] - offset[0], self.pos[1] - offset[1], self.rect().width, self.rect().height))
 
@@ -289,6 +290,11 @@ class Boss(PhysicsEntity):
         return temp_list
     
     def update(self):
+        # If all books have been collected, make the boss disappear
+        if self.game.book_manager.all_books_collected():
+            self.isAlive = False
+            return
+        
         # Start chasing when the first book is collected
         if self.start_chasing_time is None and self.game.book_manager.total_collected_books > 0:
             self.start_chasing_time = pg.time.get_ticks()
