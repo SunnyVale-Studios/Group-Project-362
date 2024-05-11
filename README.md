@@ -1,4 +1,8 @@
-# DEV NOTES
+# Members
+
+Louis Oporto
+Donovan Bosson
+Shuo Wang
 
 # Enable Platform View
 You can view touchable platforms by drawing the tilemap in the game.py
